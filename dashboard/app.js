@@ -329,7 +329,7 @@
           <span><strong>Certainty:</strong> ${(alert.confidence * 100).toFixed(1)}%</span>
         </div>
         <div class="alert-action-row">
-          <button class="btn-cyber-triage" data-id="${alert.id}">🔍 View Clues & Math</button>
+          <button class="btn-cyber-triage" data-id="${alert.id}">🔍 View Explainability & SOAR</button>
           ${
             alert.soarExecuted
               ? `<span class="soar-done-tag">✓ SOAR Neutralized</span>`
