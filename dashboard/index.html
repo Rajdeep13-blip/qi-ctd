@@ -3,331 +3,170 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QI-CTD — Quantum-Inspired Cyber Threat Detection</title>
+  <title>QI-CTD — Quantum Cyber Threat Detection</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#3b82f6">
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 </head>
-<body class="dark-theme">
-  <!-- Top Navigation Bar -->
-  <header class="navbar">
-    <div class="nav-left">
-      <div class="logo-badge">
-        <span class="quantum-icon">⚛</span>
-        <div class="brand-text">
-          <span class="brand-title">QI-CTD</span>
-          <span class="brand-subtitle">Quantum-Inspired Threat Detection</span>
+<body class="theme-dark">
+
+  <!-- TOP HEADER -->
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="brand-logo">
+        <span class="logo-icon">🛡️</span>
+        <div>
+          <h1 class="brand-name">QI-CTD Security</h1>
+          <span class="brand-tagline">Quantum-Inspired Threat Detection</span>
         </div>
       </div>
-      <div class="system-status-pill">
-        <span class="status-dot pulsing"></span>
-        <span id="systemStateText">ENGINE ONLINE (50,000 evt/s CAP)</span>
+      <div class="system-status-badge">
+        <span class="status-pulse"></span>
+        <span id="systemStateText">Protection Active</span>
       </div>
     </div>
 
-    <div class="nav-center">
-      <nav class="nav-tabs">
-        <button class="tab-btn active" data-tab="soc-view">SOC Real-Time Triage</button>
-        <button class="tab-btn" data-tab="quantum-algorithms">Quantum-Inspired Core</button>
-        <button class="tab-btn" data-tab="ciso-posture">CISO Quantum Posture (QVS)</button>
-      </nav>
-    </div>
+    <!-- TABS -->
+    <nav class="nav-pills">
+      <button class="nav-pill active" data-tab="soc-view">
+        <span>🚨 Live Security Center</span>
+      </button>
+      <button class="nav-pill" data-tab="quantum-algorithms">
+        <span>🧠 How the AI Brain Works</span>
+      </button>
+      <button class="nav-pill" data-tab="ciso-posture">
+        <span>📊 Quantum Risk & Migration</span>
+      </button>
+      <button class="nav-pill highlight-pill" data-tab="crypto-scanner">
+        <span>🔍 File & Key Inspector</span>
+      </button>
+    </nav>
 
-    <div class="nav-right">
-      <div class="kpi-mini">
-        <span class="kpi-label">Mean MTTD</span>
-        <span class="kpi-val highlight" id="mttdVal">3.8 ms</span>
+    <!-- RIGHT CONTROLS & THEME TOGGLE -->
+    <div class="header-right">
+      <div class="kpi-tag">
+        <span class="kpi-lbl">Detection Speed</span>
+        <span class="kpi-num highlight" id="mttdVal">3.8 ms</span>
       </div>
-      <div class="kpi-mini">
-        <span class="kpi-label">Recall</span>
-        <span class="kpi-val success" id="recallVal">99.4%</span>
+      <div class="kpi-tag">
+        <span class="kpi-lbl">Accuracy</span>
+        <span class="kpi-num text-success" id="recallVal">99.4%</span>
       </div>
-      <div class="kpi-mini">
-        <span class="kpi-label">FP Reduction</span>
-        <span class="kpi-val success" id="fpRedVal">-42%</span>
-      </div>
+      <button class="theme-toggle-btn" id="btnThemeToggle" title="Toggle Light / Dark Mode">
+        <span id="themeToggleIcon">☀️ Light</span>
+      </button>
     </div>
   </header>
 
-  <!-- Attack Injection Toolbar -->
-  <section class="simulation-bar">
-    <div class="sim-label">
-      <span class="sim-icon">⚡</span>
-      <span>Simulate Cryptographic Attacks:</span>
+  <!-- ATTACK SIMULATION TOOLBAR -->
+  <section class="test-panel">
+    <div class="test-panel-header">
+      <span class="test-panel-title">⚡ Test Cyber Attacks (Click to simulate a real-world hack):</span>
     </div>
-    <div class="sim-buttons">
-      <button class="btn-attack" id="btnAttackNonce">
-        <span class="btn-tag">SCENARIO 1</span>
-        <span>ECDSA Nonce Reuse</span>
+    <div class="test-buttons-grid">
+      <button class="btn-test btn-danger" id="btnAttackNonce">
+        <span class="test-step">TEST 1</span>
+        <span class="test-text">Reused Key Nonce <em>(Key Theft)</em></span>
       </button>
-      <button class="btn-attack" id="btnAttackMalleability">
-        <span class="btn-tag">SCENARIO 2</span>
-        <span>Signature Malleability</span>
+      <button class="btn-test btn-warning" id="btnAttackMalleability">
+        <span class="test-step">TEST 2</span>
+        <span class="test-text">Tampered Signature <em>(Double Spend)</em></span>
       </button>
-      <button class="btn-attack" id="btnAttackCICD">
-        <span class="btn-tag">SCENARIO 3</span>
-        <span>Rogue CI/CD Signing</span>
+      <button class="btn-test btn-danger" id="btnAttackCICD">
+        <span class="test-step">TEST 3</span>
+        <span class="test-text">Rogue Server Signing <em>(SolarWinds)</em></span>
       </button>
-      <button class="btn-attack" id="btnAttackHNDL">
-        <span class="btn-tag">SCENARIO 4</span>
-        <span>Quantum HNDL Export</span>
+      <button class="btn-test btn-warning" id="btnAttackHNDL">
+        <span class="test-step">TEST 4</span>
+        <span class="test-text">Bulk Key Hoarding <em>(Quantum Harvest)</em></span>
       </button>
-      <button class="btn-stream" id="btnToggleStream">
-        <span id="streamStateIcon">⏸️</span>
-        <span id="streamStateText">Pause Telemetry</span>
-      </button>
-      <button class="btn-reset" id="btnResetData">Clear Feed</button>
+      <div class="stream-controls">
+        <button class="btn-secondary" id="btnToggleStream">
+          <span id="streamStateIcon">⏸️</span>
+          <span id="streamStateText">Pause Feed</span>
+        </button>
+        <button class="btn-secondary" id="btnResetData">🧹 Clear Alarms</button>
+      </div>
     </div>
   </section>
 
-  <!-- Main Content Areas -->
-  <main class="main-container">
+  <!-- MAIN CONTAINER -->
+  <main class="content-wrapper">
 
-    <!-- TAB 1: SOC REAL-TIME VIEW -->
-    <div class="tab-content active" id="soc-view">
-      <div class="dashboard-grid">
+    <!-- ==================== TAB 1: LIVE SECURITY CENTER ==================== -->
+    <div class="tab-panel active" id="soc-view">
+      
+      <!-- Metrics Overview Cards -->
+      <div class="stats-cards-grid">
+        <div class="stat-card">
+          <span class="stat-label">Signatures Inspected</span>
+          <span class="stat-value" id="totalIngestedCount">1,463</span>
+          <span class="stat-sub text-success">✓ ~120 events/sec streaming</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Threats Blocked</span>
+          <span class="stat-value text-danger" id="totalAnomaliesCount">3</span>
+          <span class="stat-sub text-danger">● Instant 100% containment</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">AI Optimizer State</span>
+          <span class="stat-value text-indigo" id="quboEnergyVal">-18.42</span>
+          <span class="stat-sub">Stable equilibrium reached</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Database Storage</span>
+          <span class="stat-value text-success">SQLite</span>
+          <span class="stat-sub">qi_ctd.db saved to disk</span>
+        </div>
+      </div>
+
+      <!-- Live Split View: Alerts on Left, Stream on Right -->
+      <div class="main-split-grid">
         
-        <!-- Left: Live Alert Queue -->
-        <div class="card alert-queue-card">
-          <div class="card-header">
-            <div class="card-title-group">
-              <h3>🚨 Active Threat Alerts & Automated SOAR</h3>
-              <span class="badge badge-alert-count" id="activeAlertCount">3 Pending</span>
+        <!-- Left: Active Threats & SOAR -->
+        <div class="panel-box">
+          <div class="panel-header">
+            <div class="panel-title-wrap">
+              <h2>🚨 Active Threat Alarms</h2>
+              <span class="pill-badge pill-danger" id="activeAlertCount">3 Pending</span>
             </div>
-            <div class="filter-group">
-              <span class="filter-label">Filter:</span>
-              <button class="filter-chip active" data-filter="all">All</button>
-              <button class="filter-chip" data-filter="CRITICAL">Critical</button>
-              <button class="filter-chip" data-filter="HIGH">High</button>
-            </div>
+            <span class="panel-helper">Live alerts detected by quantum algorithms</span>
           </div>
-          <div class="card-body scrollable">
-            <div class="alerts-list" id="alertsContainer">
+          <div class="panel-body">
+            <div class="alerts-feed" id="alertsContainer">
               <!-- Dynamically populated -->
             </div>
           </div>
         </div>
 
-        <!-- Right: Streaming Telemetry & Threat Metrics -->
-        <div class="right-col-grid">
-          <!-- Top: Engine Key Metrics -->
-          <div class="card metrics-card">
-            <div class="card-header">
-              <h3>📊 Telemetry Processing & Anomaly Stats</h3>
-              <span class="refresh-time" id="lastUpdatedTime">Updated 0s ago</span>
+        <!-- Right: Live Stream Ticker -->
+        <div class="panel-box">
+          <div class="panel-header">
+            <div class="panel-title-wrap">
+              <h2>📡 Live Signature Traffic Feed</h2>
+              <span class="pill-badge pill-success">Streaming Real-Time</span>
             </div>
-            <div class="metrics-grid">
-              <div class="metric-box">
-                <span class="metric-title">Ingested Events</span>
-                <span class="metric-number" id="totalIngestedCount">1,420</span>
-                <span class="metric-sub text-cyan">~120 events/sec</span>
-              </div>
-              <div class="metric-box">
-                <span class="metric-title">Anomalies Detected</span>
-                <span class="metric-number text-alert" id="totalAnomaliesCount">4</span>
-                <span class="metric-sub text-alert">0.28% of traffic</span>
-              </div>
-              <div class="metric-box">
-                <span class="metric-title">QUBO Energy State</span>
-                <span class="metric-number text-purple" id="quboEnergyVal">-18.42</span>
-                <span class="metric-sub">Global Min Converged</span>
-              </div>
-              <div class="metric-box">
-                <span class="metric-title">Active Signing Keys</span>
-                <span class="metric-number" id="activeKeysCount">48</span>
-                <span class="metric-sub">6 High Risk</span>
-              </div>
-            </div>
+            <span class="panel-helper">Zero passwords or private keys ingested</span>
           </div>
-
-          <!-- Bottom: Live Raw Telemetry Stream Ticker -->
-          <div class="card stream-card">
-            <div class="card-header">
-              <h3>📡 Normalized Cryptographic Telemetry Stream (Zero-Key Ingestion)</h3>
-              <span class="stream-badge">LIVE STREAM</span>
-            </div>
-            <div class="card-body">
-              <div class="stream-table-wrapper">
-                <table class="stream-table">
-                  <thead>
-                    <tr>
-                      <th>Time</th>
-                      <th>Source</th>
-                      <th>Key ID</th>
-                      <th>Algorithm</th>
-                      <th>Caller / IP</th>
-                      <th>Nonce Entropy</th>
-                      <th>Latency</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody id="telemetryStreamBody">
-                    <!-- Stream rows -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- TAB 2: QUANTUM-INSPIRED ALGORITHMS VIEW -->
-    <div class="tab-content" id="quantum-algorithms">
-      <div class="algo-grid">
-
-        <!-- Card 1: QUBO Annealing Solver -->
-        <div class="card algo-card">
-          <div class="card-header">
-            <div class="algo-title-group">
-              <span class="algo-badge qubo-badge">QUBO SOLVER</span>
-              <h3>Simulated Annealing Outlier Partitioning</h3>
-            </div>
-            <span class="formula-pill">\(\min \mathbf{x}^T \mathbf{Q} \mathbf{x}, \;\mathbf{x} \in \{0, 1\}^N\)</span>
-          </div>
-          <div class="card-body">
-            <p class="algo-desc">
-              Formulates multi-dimensional signature behavior into a Hamiltonian graph. Outliers flip to state \(x_i = 1\) as temperature \(T \to 0\).
-            </p>
-            <div class="canvas-wrapper">
-              <canvas id="quboCanvas" width="480" height="200"></canvas>
-            </div>
-            <div class="algo-stats-row">
-              <div class="stat-item"><span>Matrix Dim:</span> <strong id="quboDimLabel">15 x 15</strong></div>
-              <div class="stat-item"><span>Annealing Sweeps:</span> <strong>250</strong></div>
-              <div class="stat-item"><span>Min Energy:</span> <strong id="quboMinEnergyLabel" class="text-purple">-18.42</strong></div>
-              <div class="stat-item"><span>QPU Portability:</span> <strong class="text-cyan">D-Wave / Braket Ready</strong></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 2: Matrix Product State (MPS) Tensor Network -->
-        <div class="card algo-card">
-          <div class="card-header">
-            <div class="algo-title-group">
-              <span class="algo-badge mps-badge">MPS TENSOR NET</span>
-              <h3>Matrix Product State Entanglement Classifier</h3>
-            </div>
-            <span class="formula-pill">\(|\Psi(\mathbf{v})\rangle = \bigotimes_{k=1}^d |\phi(v_k)\rangle, \;\chi=4\)</span>
-          </div>
-          <div class="card-body">
-            <p class="algo-desc">
-              Contracts feature embeddings through a 1D tensor train to capture high-order non-linear correlations (subtle nonce bias, timing jitter) in \(O(d \cdot \chi^2)\).
-            </p>
-            <div class="canvas-wrapper">
-              <canvas id="mpsCanvas" width="480" height="200"></canvas>
-            </div>
-            <div class="algo-stats-row">
-              <div class="stat-item"><span>Bond Dimension \(\chi\):</span> <strong>4</strong></div>
-              <div class="stat-item"><span>Entanglement Entropy:</span> <strong id="mpsEntropyLabel" class="text-alert">1.84 bits</strong></div>
-              <div class="stat-item"><span>Inference Latency:</span> <strong class="text-cyan">&lt; 0.8 ms</strong></div>
-              <div class="stat-item"><span>Feature Space:</span> <strong>8 Qubits</strong></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 3: Grover Amplitude Amplification -->
-        <div class="card algo-card full-width">
-          <div class="card-header">
-            <div class="algo-title-group">
-              <span class="algo-badge grover-badge">GROVER SEARCH</span>
-              <h3>Amplitude Amplification on Correlation Graph</h3>
-            </div>
-            <span class="formula-pill">\(k_{\text{opt}} \approx \frac{\pi}{4}\sqrt{\frac{N}{M}}, \; P_{\text{target}} \to 99.8\%\)</span>
-          </div>
-          <div class="card-body">
-            <div class="grover-layout">
-              <div class="grover-info">
-                <p class="algo-desc">
-                  Simulates phase inversion and diffusion operators to quadratic-accelerate search queries for distributed, multi-source attack footprints across historic signature graphs.
-                </p>
-                <div class="algo-stats-vertical">
-                  <div class="stat-item"><span>Search Space (N):</span> <strong id="groverNLabel">1,024 Records</strong></div>
-                  <div class="stat-item"><span>Marked Targets (M):</span> <strong id="groverMLabel">2 Collisions</strong></div>
-                  <div class="stat-item"><span>Optimal Iterations:</span> <strong id="groverKLabel">18 Iterations</strong></div>
-                  <div class="stat-item"><span>Target Probability:</span> <strong id="groverProbLabel" class="text-success">99.82%</strong></div>
-                </div>
-              </div>
-              <div class="canvas-wrapper grover-canvas-wrap">
-                <canvas id="groverCanvas" width="600" height="220"></canvas>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- TAB 3: CISO QUANTUM POSTURE & QVS -->
-    <div class="tab-content" id="ciso-posture">
-      <div class="ciso-grid">
-
-        <!-- Top Row: Quantum Risk Summary Cards -->
-        <div class="ciso-summary-row">
-          <div class="card ciso-kpi-card">
-            <div class="card-header"><h3>Average Quantum Risk (QVS)</h3></div>
-            <div class="qvs-gauge-wrap">
-              <div class="qvs-number" id="orgAvgQvs">72.4</div>
-              <div class="qvs-label text-alert">ELEVATED EXPOSURE</div>
-            </div>
-            <p class="qvs-sub">Mosca Condition \(X + Y > Z\) Active</p>
-          </div>
-
-          <div class="card ciso-kpi-card">
-            <div class="card-header"><h3>CRQC Horizon Countdown</h3></div>
-            <div class="qvs-gauge-wrap">
-              <div class="qvs-number text-cyan">5.8 yrs</div>
-              <div class="qvs-label">ESTIMATED SHOR'S THREAT</div>
-            </div>
-            <p class="qvs-sub">Threat Intel Consensus Horizon</p>
-          </div>
-
-          <div class="card ciso-kpi-card">
-            <div class="card-header"><h3>PQC Migration Progress</h3></div>
-            <div class="qvs-gauge-wrap">
-              <div class="qvs-number text-success" id="pqcProgressPct">16.7%</div>
-              <div class="qvs-label">NIST FIPS 204/205 READY</div>
-            </div>
-            <p class="qvs-sub">1 of 6 Critical Assets Migrated</p>
-          </div>
-
-          <div class="card ciso-kpi-card">
-            <div class="card-header"><h3>Compliance Status</h3></div>
-            <div class="compliance-badges">
-              <div class="comp-badge pass"><span>✓ NIST FIPS 204/205</span></div>
-              <div class="comp-badge warn"><span>⚠️ CNSA 2.0 (Phase 1)</span></div>
-              <div class="comp-badge warn"><span>⚠️ NIS2 Quantum Audit</span></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Bottom Row: Prioritized Key & Algorithm Inventory Table -->
-        <div class="card inventory-card">
-          <div class="card-header">
-            <h3>🔑 Enterprise Cryptographic Asset Inventory & Migration Roadmap</h3>
-            <span class="inv-filter-info">Ranked by QVS × Asset Criticality</span>
-          </div>
-          <div class="card-body">
-            <div class="table-wrapper">
-              <table class="inventory-table">
+          <div class="panel-body">
+            <div class="table-scroll-container">
+              <table class="clean-table">
                 <thead>
                   <tr>
-                    <th>Asset Name</th>
-                    <th>Key Identifier</th>
-                    <th>Current Scheme</th>
-                    <th>Data Shelf-Life</th>
-                    <th>Criticality</th>
-                    <th>Exposure</th>
-                    <th>QVS Score</th>
-                    <th>Recommended PQC Target</th>
+                    <th>Time</th>
+                    <th>Source</th>
+                    <th>Key ID</th>
+                    <th>Algorithm</th>
+                    <th>Entropy</th>
+                    <th>Latency</th>
                     <th>Status</th>
-                    <th>Action</th>
                   </tr>
                 </thead>
-                <tbody id="inventoryTableBody">
-                  <!-- Dynamically populated -->
+                <tbody id="telemetryStreamBody">
+                  <!-- Stream rows -->
                 </tbody>
               </table>
             </div>
@@ -337,41 +176,247 @@
       </div>
     </div>
 
-  </main>
-
-  <!-- Explainability & SOAR Triage Modal -->
-  <div class="modal-backdrop" id="explainModal" style="display: none;">
-    <div class="modal-dialog">
-      <div class="modal-header">
-        <div class="modal-title-group">
-          <span class="modal-badge" id="modalSeverityBadge">CRITICAL</span>
-          <h3 id="modalAlertTitle">Threat Triage & Explainability</h3>
-        </div>
-        <button class="modal-close-btn" id="modalCloseBtn">&times;</button>
+    <!-- ==================== TAB 2: HOW THE BRAIN WORKS ==================== -->
+    <div class="tab-panel" id="quantum-algorithms">
+      <div class="algo-explanation-banner">
+        <h2>🧠 How Quantum-Inspired Math Catches Hackers in Milliseconds</h2>
+        <p>Instead of waiting for physical quantum computers, we run mathematical quantum principles on standard servers to find hackers without false alarms.</p>
       </div>
-      <div class="modal-body">
-        <div class="modal-info-grid">
-          <div class="info-item"><span>Target Key ID:</span> <strong id="modalKeyId">key-xxx</strong></div>
-          <div class="info-item"><span>Detection Engine:</span> <strong id="modalEngine">QUBO Solver</strong></div>
-          <div class="info-item"><span>Confidence Score:</span> <strong id="modalConfidence">99.2%</strong></div>
-          <div class="info-item"><span>MITRE ATT&CK TTP:</span> <strong id="modalMitre" class="text-cyan">T1552.004</strong></div>
-        </div>
 
-        <div class="explainability-section">
-          <h4>🧠 Quantum-Inspired Feature Attribution (SHAP Decomposition)</h4>
-          <div class="feature-bar-list" id="modalFeatureBars">
-            <!-- Feature attribution bars -->
+      <div class="algorithms-grid">
+        
+        <!-- Algo 1: QUBO Annealing -->
+        <div class="panel-box">
+          <div class="panel-header">
+            <div class="panel-title-wrap">
+              <span class="badge-indigo">Algorithm 1</span>
+              <h3>QUBO Annealer (The Outlier Finder)</h3>
+            </div>
+          </div>
+          <div class="panel-body">
+            <p class="algo-help-text">
+              Like cooling hot metal into a crystal, this algorithm cools noisy data down. Normal signatures settle to 0, and the hacker pops out as an energetic <strong>1</strong>.
+            </p>
+            <div class="canvas-box">
+              <canvas id="quboCanvas" width="480" height="180"></canvas>
+            </div>
           </div>
         </div>
 
-        <div class="soar-section">
-          <h4>⚡ Automated SOAR Playbook Execution</h4>
-          <div class="playbook-box">
-            <span class="playbook-name" id="modalPlaybookName">Quarantine Key & Revoke Subverted Certificates</span>
-            <div class="playbook-actions">
-              <button class="btn-soar-execute" id="btnExecuteSoar">Execute 1-Click Response</button>
-              <button class="btn-soar-cef" id="btnExportCef">Export SIEM CEF Log</button>
+        <!-- Algo 2: MPS Tensor Network -->
+        <div class="panel-box">
+          <div class="panel-header">
+            <div class="panel-title-wrap">
+              <span class="badge-indigo">Algorithm 2</span>
+              <h3>Tensor Networks (The Detective)</h3>
             </div>
+          </div>
+          <div class="panel-body">
+            <p class="algo-help-text">
+              Connects 8 different clues (time, location, user permissions) like quantum entangled beads. If multiple weird clues happen at once, it flags the attack.
+            </p>
+            <div class="canvas-box">
+              <canvas id="mpsCanvas" width="480" height="180"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Algo 3: Grover Search -->
+        <div class="panel-box full-span">
+          <div class="panel-header">
+            <div class="panel-title-wrap">
+              <span class="badge-indigo">Algorithm 3</span>
+              <h3>Grover Search (The Needle Hunter)</h3>
+            </div>
+          </div>
+          <div class="panel-body">
+            <p class="algo-help-text">
+              Like a quantum magnifying glass, it doubles the brightness of the hacker's hidden trace with each step until it is <strong>99.8%</strong> sure.
+            </p>
+            <div class="canvas-box">
+              <canvas id="groverCanvas" width="700" height="180"></canvas>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==================== TAB 3: CISO QUANTUM POSTURE ==================== -->
+    <div class="tab-panel" id="ciso-posture">
+      
+      <!-- Quantum Summary Cards -->
+      <div class="ciso-summary-grid">
+        <div class="ciso-kpi-card">
+          <span class="ciso-card-lbl">Overall Quantum Risk Score</span>
+          <div class="ciso-card-num text-danger" id="orgAvgQvs">72.4 / 100</div>
+          <span class="ciso-card-sub">Action required on vulnerable keys</span>
+        </div>
+        <div class="ciso-kpi-card">
+          <span class="ciso-card-lbl">Time to Quantum Threat</span>
+          <div class="ciso-card-num text-indigo">5.8 Years</div>
+          <span class="ciso-card-sub">Until Quantum Computers crack RSA</span>
+        </div>
+        <div class="ciso-kpi-card">
+          <span class="ciso-card-lbl">Post-Quantum Migration</span>
+          <div class="ciso-card-num text-success" id="pqcProgressPct">16.7%</div>
+          <span class="ciso-card-sub">NIST FIPS 204 Ready</span>
+        </div>
+        <div class="ciso-kpi-card">
+          <span class="ciso-card-lbl">Regulatory Compliance</span>
+          <div class="compliance-pill-list">
+            <span class="comp-badge pass">✓ NIST FIPS 204/205</span>
+            <span class="comp-badge warn">⚠️ CNSA 2.0 In Progress</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Key Inventory Table -->
+      <div class="panel-box">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <h2>🔑 Enterprise Cryptographic Key Inventory & Upgrades</h2>
+          </div>
+          <span class="panel-helper">Ranked by risk score. Click 'Upgrade' to simulate post-quantum protection.</span>
+        </div>
+        <div class="panel-body">
+          <div class="table-scroll-container">
+            <table class="clean-table">
+              <thead>
+                <tr>
+                  <th>Asset Name</th>
+                  <th>Key ID</th>
+                  <th>Current Scheme</th>
+                  <th>Shelf-Life</th>
+                  <th>Criticality</th>
+                  <th>Danger Score (QVS)</th>
+                  <th>Upgrade Target</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryTableBody">
+                <!-- Inventory rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==================== TAB 4: FILE & KEY INSPECTOR ==================== -->
+    <div class="tab-panel" id="crypto-scanner">
+      <div class="scanner-layout-grid">
+        
+        <!-- Scanner Input Box -->
+        <div class="panel-box">
+          <div class="panel-header">
+            <div class="panel-title-wrap">
+              <h2>📂 Inspect Certificate, Document, or Key</h2>
+            </div>
+            <span class="panel-helper">Test any real file or paste text to test quantum safety</span>
+          </div>
+          <div class="panel-body">
+            
+            <div class="sample-preset-row">
+              <span class="preset-label">Sample Presets:</span>
+              <button class="btn-preset" id="btnSampleRSA">Corporate RSA-2048 Cert</button>
+              <button class="btn-preset" id="btnSampleECDSA">Blockchain ECDSA Key</button>
+              <button class="btn-preset" id="btnSamplePQC">NIST ML-DSA-65 (Safe)</button>
+            </div>
+
+            <textarea id="scannerInputText" class="clean-textarea" placeholder="Paste X.509 certificate PEM, public key, or transaction signature text here..."></textarea>
+
+            <div class="scanner-button-row">
+              <button class="btn-primary" id="btnRunScan">🔍 Inspect Cryptographic Safety</button>
+              <button class="btn-secondary" id="btnClearScan">Clear</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scanner Output Box -->
+        <div class="panel-box">
+          <div class="panel-header">
+            <div class="panel-title-wrap">
+              <h2>🔬 Security Inspection Verdict</h2>
+              <span class="pill-badge pill-indigo" id="scanStatusBadge">Ready</span>
+            </div>
+          </div>
+          <div class="panel-body">
+            
+            <div class="scan-stats-grid">
+              <div class="scan-stat-card">
+                <span class="scan-stat-lbl">Algorithm Detected</span>
+                <span class="scan-stat-val text-indigo" id="scanAlgoLabel">RSA-2048</span>
+                <span class="scan-stat-sub" id="scanKeyLengthLabel">2048-bit Modulus</span>
+              </div>
+              <div class="scan-stat-card">
+                <span class="scan-stat-lbl">Quantum Danger Score</span>
+                <span class="scan-stat-val text-danger" id="scanQvsLabel">84.5 / 100</span>
+                <span class="scan-stat-sub text-danger" id="scanUrgencyLabel">HIGH RISK</span>
+              </div>
+              <div class="scan-stat-card">
+                <span class="scan-stat-lbl">Time to Quantum Crack</span>
+                <span class="scan-stat-val text-danger" id="scanTimeToCrack">&lt; 10 Seconds</span>
+                <span class="scan-stat-sub">Shor's Algorithm Risk</span>
+              </div>
+            </div>
+
+            <div class="recommendation-card">
+              <h4>🛡️ Recommended Action:</h4>
+              <p id="scanRecText">This key uses classical RSA. Upgrade to NIST Post-Quantum ML-DSA-65 to make it immune to quantum computers.</p>
+              
+              <button class="btn-success" id="btnGeneratePqcSeal">
+                ⚡ Generate Quantum-Safe Seal (NIST ML-DSA-65)
+              </button>
+            </div>
+
+            <div id="pqcSealOutput" class="seal-box" style="display:none;">
+              <h4 class="text-success">✓ Verified NIST FIPS 204 Quantum-Safe Cryptographic Seal:</h4>
+              <textarea class="clean-textarea" id="pqcSealText" readonly style="height:90px; margin-top:8px;"></textarea>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==================== EXPLAINABILITY & TRIAGE MODAL ==================== -->
+  <div class="modal-backdrop" id="explainModal" style="display: none;">
+    <div class="modal-dialog-box">
+      <div class="modal-header-bar">
+        <div class="modal-title-group">
+          <span class="pill-badge pill-danger" id="modalSeverityBadge">CRITICAL</span>
+          <h3 id="modalAlertTitle">Threat Triage & Plain-English Explanation</h3>
+        </div>
+        <button class="btn-close-modal" id="modalCloseBtn">&times;</button>
+      </div>
+      
+      <div class="modal-body-content">
+        <div class="modal-summary-grid">
+          <div class="modal-summary-item"><span>Target Key:</span> <strong id="modalKeyId">key-xxx</strong></div>
+          <div class="modal-summary-item"><span>Detection Engine:</span> <strong id="modalEngine">QUBO Solver</strong></div>
+          <div class="modal-summary-item"><span>AI Confidence:</span> <strong id="modalConfidence" class="text-success">99.2%</strong></div>
+          <div class="modal-summary-item"><span>Attack Type:</span> <strong id="modalMitre" class="text-indigo">T1552.004</strong></div>
+        </div>
+
+        <div class="modal-section">
+          <h4>🧠 Why the AI Flagged This (Clue Breakdown):</h4>
+          <div class="feature-bar-list" id="modalFeatureBars"></div>
+        </div>
+
+        <div class="modal-section soar-action-card">
+          <h4>⚡ 1-Click Automated Defense (SOAR):</h4>
+          <p style="font-size:13px; margin-bottom:12px; color:var(--text-muted);">
+            Action: <strong id="modalPlaybookName" class="text-danger">Quarantine Key</strong>
+          </p>
+          <div class="modal-action-buttons">
+            <button class="btn-danger-action" id="btnExecuteSoar">⚡ Execute 1-Click Lockdown</button>
+            <button class="btn-secondary" id="btnExportCef">Copy Security Log (CEF)</button>
           </div>
         </div>
       </div>

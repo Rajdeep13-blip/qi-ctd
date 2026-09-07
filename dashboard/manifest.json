@@ -1,0 +1,21 @@
+{
+  "name": "QI-CTD Quantum Threat Detection",
+  "short_name": "QI-CTD",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0a0d14",
+  "theme_color": "#00f0ff",
+  "description": "Quantum-Inspired Cyber Threat Detection for Digital Signature Security",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2092/2092663.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2092/2092663.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

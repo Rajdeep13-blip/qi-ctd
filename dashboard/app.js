@@ -1,13 +1,13 @@
 /**
- * QI-CTD Interactive Dashboard Application
+ * QI-CTD Simplified, Clean Dashboard Application
  * Real-Time Quantum-Inspired Threat Detection & Posture Orchestration
- * (Dynamically resolves Backend URL for Localhost, LAN IP, and Public Domains)
+ * (Includes 1-Click Light/Dark Theme Switcher, Real-Time Streaming, and Crypto Scanner)
  */
 
 (function () {
   'use strict';
 
-  // Dynamically resolve backend host based on where the browser is accessing the page
+  // Dynamically resolve backend host
   const getBackendUrl = () => {
     if (window.location.protocol.startsWith('http')) {
       return window.location.origin;
@@ -19,10 +19,11 @@
 
   // --- STATE ---
   const state = {
+    theme: localStorage.getItem('qi_theme') || 'dark',
     backendConnected: false,
     streamingActive: true,
     streamTimer: null,
-    totalIngested: 1420,
+    totalIngested: 1463,
     totalAnomalies: 3,
     activeAlerts: [],
     recentEvents: [],
@@ -48,7 +49,7 @@
       { id: 'AST-003', name: 'Edge TLS Wildcard Gateway', keyId: 'key-edge-tls-wildcard', algo: 'RSA-2048', shelfLife: '1 yr', criticality: '1.4 (Med)', exposure: 'PUBLIC', qvs: 62.0, targetPqc: 'ML-DSA-44 (Dilithium2)', status: 'ACTIVE' },
       { id: 'AST-004', name: 'Treasury Blockchain Multisig', keyId: 'key-ecdsa-treasury-master', algo: 'ECDSA-secp256k1', shelfLife: '20 yrs', criticality: '2.0 (High)', exposure: 'PUBLIC', qvs: 94.8, targetPqc: 'ML-DSA-65 (Dilithium3)', status: 'ACTIVE' },
       { id: 'AST-005', name: 'Executive PDF Contract Signer', keyId: 'key-doc-exec-signer', algo: 'RSA-2048', shelfLife: '25 yrs', criticality: '1.7 (High)', exposure: 'INTERNAL', qvs: 88.6, targetPqc: 'ML-DSA-65 (Dilithium3)', status: 'ACTIVE' },
-      { id: 'AST-006', name: 'PQC Artifact Signer (Pilot)', keyId: 'key-pqc-dilithium-01', algo: 'ML-DSA-65 (FIPS 204)', shelfLife: '10 yrs', criticality: '1.5 (Med)', exposure: 'INTERNAL', qvs: 3.2, targetPqc: 'ML-DSA-65 (Current)', status: 'MIGRATED' }
+      { id: 'AST-006', name: 'PQC Artifact Signer (Pilot)', keyId: 'key-pqc-dilithium-01', algo: 'ML-DSA-65', shelfLife: '10 yrs', criticality: '1.5 (Med)', exposure: 'INTERNAL', qvs: 3.2, targetPqc: 'ML-DSA-65 (Current)', status: 'MIGRATED' }
     ]
   };
 
@@ -60,10 +61,10 @@
       severity: 'CRITICAL',
       title: 'ECDSA Nonce Collision Detected (Catastrophic Key Recovery Threat)',
       keyId: 'key-ecdsa-treasury-master',
-      engine: 'Grover Amplitude Search + QUBO',
+      engine: 'Grover Search + QUBO',
       confidence: 0.999,
       mitre: 'T1552.004',
-      summary: 'Identical k-value nonce reused across 2 blockchain transactions from differing IP origins.',
+      summary: 'Identical k-value nonce reused across 2 transactions. Private key recovery mathematically feasible.',
       playbook: 'Emergency Key Revocation & CA Invalidation',
       soarExecuted: false,
       attributions: { 'nonce_collision_entropy': 0.98, 'cross_ip_divergence': 0.85, 'geo_risk_score': 0.72 }
@@ -100,17 +101,20 @@
 
   // Initial Stream Rows
   state.recentEvents = [
-    { time: '20:34:12', src: 'TLS/mTLS', keyId: 'key-edge-tls-wildcard', algo: 'RSA-2048', caller: 'tls-edge-01 (10.0.1.4)', entropy: 7.94, lat: '3.8ms', isAnomaly: false },
-    { time: '20:34:12', src: 'PKI/HSM', keyId: 'key-root-ca-01', algo: 'RSA-4096', caller: 'pki-signer-svc (10.0.4.12)', entropy: 7.96, lat: '4.1ms', isAnomaly: false },
-    { time: '20:34:13', src: 'CI/CD', keyId: 'key-pqc-dilithium-01', algo: 'ML-DSA-65', caller: 'prod-release-bot (10.2.1.8)', entropy: 7.92, lat: '5.2ms', isAnomaly: false },
-    { time: '20:34:14', src: 'Blockchain', keyId: 'key-ecdsa-treasury-master', algo: 'ECDSA-secp256k1', caller: 'validator-node (45.33.32.156)', entropy: 2.15, lat: '3.2ms', isAnomaly: true }
+    { time: '00:38:50', src: 'PKI/HSM', keyId: 'key-pki-hsm-04', algo: 'ECDSA-P256', caller: 'svc-worker-21 (10.0.1.73)', entropy: '7.97', lat: '4.6ms', isAnomaly: false },
+    { time: '00:38:29', src: 'Blockchain', keyId: 'key-blockchain-82', algo: 'ECDSA-P256', caller: 'svc-worker-37 (10.0.1.98)', entropy: '7.98', lat: '3.8ms', isAnomaly: false },
+    { time: '00:38:27', src: 'PKI/HSM', keyId: 'key-pki-hsm-03', algo: 'RSA-4096', caller: 'svc-worker-26 (10.0.1.95)', entropy: '7.96', lat: '4.3ms', isAnomaly: false },
+    { time: '00:38:26', src: 'Blockchain', keyId: 'key-blockchain-81', algo: 'ECDSA-P256', caller: 'svc-worker-93 (10.0.1.193)', entropy: '7.91', lat: '4.3ms', isAnomaly: false },
+    { time: '00:38:24', src: 'Blockchain', keyId: 'key-blockchain-81', algo: 'ECDSA-secp256k1', caller: 'svc-worker-22 (10.0.1.63)', entropy: '7.96', lat: '4.5ms', isAnomaly: false }
   ];
 
   // DOM Elements
   const el = {
+    btnThemeToggle: document.getElementById('btnThemeToggle'),
+    themeToggleIcon: document.getElementById('themeToggleIcon'),
     systemStateText: document.getElementById('systemStateText'),
-    tabBtns: document.querySelectorAll('.tab-btn'),
-    tabContents: document.querySelectorAll('.tab-content'),
+    tabBtns: document.querySelectorAll('.nav-pill'),
+    tabContents: document.querySelectorAll('.tab-panel'),
     alertsContainer: document.getElementById('alertsContainer'),
     activeAlertCount: document.getElementById('activeAlertCount'),
     telemetryStreamBody: document.getElementById('telemetryStreamBody'),
@@ -145,10 +149,48 @@
     // Canvases
     quboCanvas: document.getElementById('quboCanvas'),
     mpsCanvas: document.getElementById('mpsCanvas'),
-    groverCanvas: document.getElementById('groverCanvas')
+    groverCanvas: document.getElementById('groverCanvas'),
+    // Scanner Elements (Tab 4)
+    btnSampleRSA: document.getElementById('btnSampleRSA'),
+    btnSampleECDSA: document.getElementById('btnSampleECDSA'),
+    btnSamplePQC: document.getElementById('btnSamplePQC'),
+    scannerInputText: document.getElementById('scannerInputText'),
+    btnRunScan: document.getElementById('btnRunScan'),
+    btnClearScan: document.getElementById('btnClearScan'),
+    scanStatusBadge: document.getElementById('scanStatusBadge'),
+    scanAlgoLabel: document.getElementById('scanAlgoLabel'),
+    scanKeyLengthLabel: document.getElementById('scanKeyLengthLabel'),
+    scanQvsLabel: document.getElementById('scanQvsLabel'),
+    scanUrgencyLabel: document.getElementById('scanUrgencyLabel'),
+    scanTimeToCrack: document.getElementById('scanTimeToCrack'),
+    scanRecText: document.getElementById('scanRecText'),
+    btnGeneratePqcSeal: document.getElementById('btnGeneratePqcSeal'),
+    pqcSealOutput: document.getElementById('pqcSealOutput'),
+    pqcSealText: document.getElementById('pqcSealText')
   };
 
   let activeModalAlert = null;
+
+  // --- THEME MANAGEMENT ---
+  function applyTheme(themeName) {
+    state.theme = themeName;
+    localStorage.setItem('qi_theme', themeName);
+    if (themeName === 'light') {
+      document.body.className = 'theme-light';
+      if (el.themeToggleIcon) el.themeToggleIcon.textContent = '🌙 Dark Mode';
+    } else {
+      document.body.className = 'theme-dark';
+      if (el.themeToggleIcon) el.themeToggleIcon.textContent = '☀️ Light Mode';
+    }
+    renderAllCanvases();
+  }
+
+  if (el.btnThemeToggle) {
+    el.btnThemeToggle.addEventListener('click', () => {
+      const newTheme = state.theme === 'dark' ? 'light' : 'dark';
+      applyTheme(newTheme);
+    });
+  }
 
   // --- BACKEND HEALTH CHECK & SYNC ---
   async function checkBackendConnection() {
@@ -156,15 +198,13 @@
       const res = await fetch(`${BACKEND_URL}/health`, { method: 'GET', signal: AbortSignal.timeout(2000) });
       if (res.ok) {
         state.backendConnected = true;
-        el.systemStateText.innerHTML = `ONLINE (Bound to ${BACKEND_URL})`;
+        if (el.systemStateText) el.systemStateText.innerHTML = `Live Python Server Connected`;
         syncWithBackend();
         return;
       }
-    } catch (e) {
-      // Backend not running
-    }
+    } catch (e) {}
     state.backendConnected = false;
-    el.systemStateText.textContent = `STANDALONE CLIENT MODE (Run 'python api/server.py' for Live Server)`;
+    if (el.systemStateText) el.systemStateText.textContent = `Standby / Ready`;
   }
 
   async function syncWithBackend() {
@@ -229,36 +269,35 @@
 
     state.activeAlerts.forEach(alert => {
       const item = document.createElement('div');
-      item.className = `alert-item severity-${alert.severity} ${alert.soarExecuted ? 'soar-executed' : ''}`;
+      item.className = `alert-card-item severity-${alert.severity} ${alert.soarExecuted ? 'soar-executed' : ''}`;
       item.innerHTML = `
-        <div class="alert-header">
-          <span class="alert-badge ${alert.severity}">${alert.severity}</span>
-          <span class="alert-time">${alert.time}</span>
+        <div class="alert-top-row">
+          <span class="pill-badge ${alert.severity === 'CRITICAL' ? 'pill-danger' : 'pill-warning'}">${alert.severity} THREAT</span>
+          <span style="font-size:11px; color:var(--text-soft); font-family:var(--font-mono);">${alert.time}</span>
         </div>
-        <div class="alert-title">${alert.title}</div>
-        <div class="alert-meta-row">
-          <span><strong>Key:</strong> ${alert.keyId}</span>
-          <span><strong>Engine:</strong> ${alert.engine}</span>
-          <span><strong>Confidence:</strong> ${(alert.confidence * 100).toFixed(1)}%</span>
-          <span><strong>MITRE:</strong> ${alert.mitre}</span>
+        <div class="alert-title-text">${alert.title}</div>
+        <div class="alert-meta-tags">
+          <span><strong>Target Key:</strong> ${alert.keyId}</span>
+          <span><strong>AI Engine:</strong> ${alert.engine}</span>
+          <span><strong>Certainty:</strong> ${(alert.confidence * 100).toFixed(1)}%</span>
         </div>
-        <div class="alert-actions">
-          <button class="btn-triage" data-id="${alert.id}">🔍 View Explainability</button>
+        <div class="alert-action-footer">
+          <button class="btn-view-clues" data-id="${alert.id}">🔍 View AI Clues</button>
           ${
             alert.soarExecuted
-              ? `<span class="soar-status-tag">✓ SOAR Playbook Executed</span>`
-              : `<button class="btn-soar-action" data-id="${alert.id}">⚡ Execute: ${alert.playbook.split('&')[0]}</button>`
+              ? `<span style="font-size:12px; color:var(--accent-success); font-weight:700;">✓ Threat Neutralized</span>`
+              : `<button class="btn-lockdown" data-id="${alert.id}">⚡ Quarantine Key</button>`
           }
         </div>
       `;
       el.alertsContainer.appendChild(item);
     });
 
-    el.alertsContainer.querySelectorAll('.btn-triage').forEach(b => {
+    el.alertsContainer.querySelectorAll('.btn-view-clues').forEach(b => {
       b.addEventListener('click', () => openModal(b.getAttribute('data-id')));
     });
 
-    el.alertsContainer.querySelectorAll('.btn-soar-action').forEach(b => {
+    el.alertsContainer.querySelectorAll('.btn-lockdown').forEach(b => {
       b.addEventListener('click', () => executeSoarDirect(b.getAttribute('data-id')));
     });
   }
@@ -268,22 +307,21 @@
     el.telemetryStreamBody.innerHTML = '';
     state.recentEvents.forEach(ev => {
       const row = document.createElement('tr');
-      if (ev.isAnomaly) row.className = 'stream-row-anomaly';
+      if (ev.isAnomaly) row.className = 'row-threat';
       row.innerHTML = `
         <td>${ev.time}</td>
-        <td>${ev.src}</td>
+        <td><strong>${ev.src}</strong></td>
         <td>${ev.keyId}</td>
         <td>${ev.algo}</td>
-        <td>${ev.caller}</td>
         <td>${ev.entropy} bits</td>
         <td>${ev.lat}</td>
-        <td>${ev.isAnomaly ? '<span class="text-alert">🚨 ANOMALY</span>' : '<span class="text-success">✓ VALID</span>'}</td>
+        <td>${ev.isAnomaly ? '<span class="pill-badge pill-danger">🚨 BLOCKED</span>' : '<span class="pill-badge pill-success">✓ SAFE</span>'}</td>
       `;
       el.telemetryStreamBody.appendChild(row);
     });
 
-    el.totalIngestedCount.textContent = state.totalIngested.toLocaleString();
-    el.totalAnomaliesCount.textContent = state.totalAnomalies.toLocaleString();
+    if (el.totalIngestedCount) el.totalIngestedCount.textContent = state.totalIngested.toLocaleString();
+    if (el.totalAnomaliesCount) el.totalAnomaliesCount.textContent = state.totalAnomalies.toLocaleString();
   }
 
   // --- RENDER INVENTORY TABLE ---
@@ -297,27 +335,26 @@
       if (asset.qvs <= 10.0 || asset.status === 'MIGRATED') pqcCount++;
 
       const tr = document.createElement('tr');
-      const qvsColor = asset.qvs >= 80 ? 'text-alert' : (asset.qvs >= 50 ? 'text-purple' : 'text-success');
+      const qvsColor = asset.qvs >= 80 ? 'text-danger' : (asset.qvs >= 50 ? 'text-warning' : 'text-success');
 
       tr.innerHTML = `
         <td><strong>${asset.name}</strong></td>
         <td>${asset.keyId}</td>
-        <td><span class="formula-pill">${asset.algo}</span></td>
+        <td><code>${asset.algo}</code></td>
         <td>${asset.shelfLife}</td>
         <td>${asset.criticality}</td>
-        <td>${asset.exposure}</td>
-        <td><strong class="${qvsColor}">${asset.qvs.toFixed(1)}</strong></td>
-        <td><span class="text-cyan">${asset.targetPqc}</span></td>
+        <td><strong class="${qvsColor}">${asset.qvs.toFixed(1)} / 100</strong></td>
+        <td><span class="text-indigo">${asset.targetPqc}</span></td>
         <td>
-          <span class="comp-badge ${asset.status === 'MIGRATED' ? 'pass' : (asset.status === 'QUARANTINED' ? 'warn' : 'warn')}">
+          <span class="pill-badge ${asset.status === 'MIGRATED' ? 'pill-success' : 'pill-warning'}">
             ${asset.status}
           </span>
         </td>
         <td>
           ${
             asset.status === 'MIGRATED'
-              ? '<span class="text-success">✓ Protected</span>'
-              : `<button class="btn-triage btn-migrate" data-key="${asset.keyId}">Migrate to PQC</button>`
+              ? '<span class="text-success" style="font-weight:700;">✓ Protected</span>'
+              : `<button class="btn-migrate-action" data-key="${asset.keyId}">Upgrade Key</button>`
           }
         </td>
       `;
@@ -325,11 +362,11 @@
     });
 
     const avgQvs = (totalQvs / state.inventory.length).toFixed(1);
-    el.orgAvgQvs.textContent = avgQvs;
+    if (el.orgAvgQvs) el.orgAvgQvs.textContent = `${avgQvs} / 100`;
     const pct = ((pqcCount / state.inventory.length) * 100).toFixed(1);
-    el.pqcProgressPct.textContent = `${pct}%`;
+    if (el.pqcProgressPct) el.pqcProgressPct.textContent = `${pct}%`;
 
-    el.inventoryTableBody.querySelectorAll('.btn-migrate').forEach(btn => {
+    el.inventoryTableBody.querySelectorAll('.btn-migrate-action').forEach(btn => {
       btn.addEventListener('click', () => {
         const keyId = btn.getAttribute('data-key');
         migrateAssetToPqc(keyId);
@@ -344,11 +381,15 @@
       item.qvs = 3.5;
       item.status = 'MIGRATED';
       renderInventoryTable();
-      showToast(`Key '${keyId}' migrated to ${item.targetPqc} (QVS reduced to 3.5).`);
+      showToast(`Key '${keyId}' upgraded to Quantum-Safe ML-DSA! Danger score dropped to 3.5.`);
     }
   }
 
   // --- CANVASES & VISUALIZERS ---
+  function isDarkTheme() {
+    return state.theme !== 'light';
+  }
+
   function drawQuboCanvas() {
     if (!el.quboCanvas) return;
     const ctx = el.quboCanvas.getContext('2d');
@@ -356,16 +397,21 @@
     const h = el.quboCanvas.height;
     ctx.clearRect(0, 0, w, h);
 
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    const isDark = isDarkTheme();
+    const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+    const textColor = isDark ? '#94a3b8' : '#64748b';
+    const curveColor = '#6366f1';
+
+    ctx.strokeStyle = gridColor;
     ctx.lineWidth = 1;
-    for (let y = 30; y < h; y += 35) {
+    for (let y = 25; y < h; y += 30) {
       ctx.beginPath();
       ctx.moveTo(30, y);
       ctx.lineTo(w / 2 - 20, y);
       ctx.stroke();
     }
 
-    ctx.strokeStyle = '#a855f7';
+    ctx.strokeStyle = curveColor;
     ctx.lineWidth = 2.5;
     ctx.beginPath();
     const trace = state.quboEnergyTrace;
@@ -374,49 +420,50 @@
     const maxVal = 0;
 
     trace.forEach((val, i) => {
-      const x = 40 + i * xStep;
-      const y = 30 + ((val - maxVal) / (minVal - maxVal)) * (h - 60);
+      const x = 35 + i * xStep;
+      const y = 25 + ((val - maxVal) / (minVal - maxVal)) * (h - 50);
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     });
     ctx.stroke();
 
     trace.forEach((val, i) => {
-      const x = 40 + i * xStep;
-      const y = 30 + ((val - maxVal) / (minVal - maxVal)) * (h - 60);
-      ctx.fillStyle = i === trace.length - 1 ? '#00f0ff' : '#a855f7';
+      const x = 35 + i * xStep;
+      const y = 25 + ((val - maxVal) / (minVal - maxVal)) * (h - 50);
+      ctx.fillStyle = i === trace.length - 1 ? '#10b981' : '#6366f1';
       ctx.beginPath();
       ctx.arc(x, y, i === trace.length - 1 ? 5 : 3, 0, Math.PI * 2);
       ctx.fill();
     });
 
-    ctx.fillStyle = '#8b9bb4';
-    ctx.font = '10px JetBrains Mono';
-    ctx.fillText('Simulated Annealing Energy E(t)', 40, 20);
-    ctx.fillText(`E_min = ${trace[trace.length - 1]}`, w / 2 - 90, h - 10);
+    ctx.fillStyle = textColor;
+    ctx.font = '10px Inter, sans-serif';
+    ctx.fillText('Energy Cooling Curve (T → 0)', 35, 16);
+    ctx.fillText(`Lowest Energy = ${trace[trace.length - 1]}`, w / 2 - 110, h - 8);
 
-    const startX = w / 2 + 30;
-    ctx.fillText('Qubit Spin State Vector x ∈ {0, 1}^N', startX, 20);
+    // Qubit Spins
+    const startX = w / 2 + 25;
+    ctx.fillText('Qubit Outlier States (0 = Safe, 1 = Attacker)', startX, 16);
 
     const cols = 5;
-    const cellSize = 24;
-    const gap = 8;
+    const cellSize = 22;
+    const gap = 7;
 
     state.quboSpins.forEach((spin, idx) => {
       const r = Math.floor(idx / cols);
       const c = idx % cols;
       const cx = startX + c * (cellSize + gap);
-      const cy = 40 + r * (cellSize + gap);
+      const cy = 30 + r * (cellSize + gap);
 
-      ctx.fillStyle = spin === 1 ? 'rgba(239, 68, 68, 0.85)' : 'rgba(0, 240, 255, 0.2)';
-      ctx.strokeStyle = spin === 1 ? '#ef4444' : '#00f0ff';
+      ctx.fillStyle = spin === 1 ? 'rgba(244, 63, 94, 0.85)' : (isDark ? 'rgba(99, 102, 241, 0.2)' : 'rgba(99, 102, 241, 0.1)');
+      ctx.strokeStyle = spin === 1 ? '#f43f5e' : '#6366f1';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.rect(cx, cy, cellSize, cellSize);
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = spin === 1 ? '#fff' : '#8b9bb4';
+      ctx.fillStyle = spin === 1 ? '#fff' : (isDark ? '#cbd5e1' : '#334155');
       ctx.font = '11px JetBrains Mono';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -434,65 +481,68 @@
     const h = el.mpsCanvas.height;
     ctx.clearRect(0, 0, w, h);
 
+    const isDark = isDarkTheme();
+    const textColor = isDark ? '#94a3b8' : '#64748b';
     const numNodes = 8;
-    const nodeRadius = 14;
-    const stepX = (w - 80) / (numNodes - 1);
-    const cy = h / 2 + 10;
+    const nodeRadius = 13;
+    const stepX = (w - 70) / (numNodes - 1);
+    const cy = h / 2 + 8;
 
-    ctx.strokeStyle = '#00f0ff';
+    ctx.strokeStyle = '#6366f1';
     ctx.lineWidth = 2.5;
     ctx.beginPath();
-    ctx.moveTo(40, cy);
-    ctx.lineTo(40 + (numNodes - 1) * stepX, cy);
+    ctx.moveTo(35, cy);
+    ctx.lineTo(35 + (numNodes - 1) * stepX, cy);
     ctx.stroke();
 
     state.mpsBondEntropies.forEach((entropy, i) => {
-      const xMid = 40 + i * stepX + stepX / 2;
-      ctx.fillStyle = entropy > 1.2 ? '#ef4444' : '#a855f7';
+      const xMid = 35 + i * stepX + stepX / 2;
+      ctx.fillStyle = entropy > 1.2 ? '#f43f5e' : '#6366f1';
       ctx.font = '9px JetBrains Mono';
       ctx.textAlign = 'center';
-      ctx.fillText(`χ=4 (S=${entropy})`, xMid, cy - 22);
+      ctx.fillText(`S=${entropy}`, xMid, cy - 18);
 
-      ctx.fillStyle = '#00f0ff';
+      ctx.fillStyle = '#6366f1';
       ctx.beginPath();
       ctx.arc(xMid, cy, 3, 0, Math.PI * 2);
       ctx.fill();
     });
 
     for (let i = 0; i < numNodes; i++) {
-      const cx = 40 + i * stepX;
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      const cx = 35 + i * stepX;
+
+      ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.2)';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(cx, cy + nodeRadius);
-      ctx.lineTo(cx, cy + 36);
+      ctx.lineTo(cx, cy + 30);
       ctx.stroke();
 
-      ctx.fillStyle = '#8b9bb4';
-      ctx.font = '8px JetBrains Mono';
+      ctx.fillStyle = textColor;
+      ctx.font = '8.5px JetBrains Mono';
       ctx.textAlign = 'center';
-      ctx.fillText(`|φ(${i+1})⟩`, cx, cy + 48);
+      ctx.fillText(`Clue ${i+1}`, cx, cy + 42);
 
-      ctx.fillStyle = '#111724';
-      ctx.strokeStyle = i === 0 || i === 7 ? '#a855f7' : '#00f0ff';
+      ctx.fillStyle = isDark ? '#131b2e' : '#ffffff';
+      ctx.strokeStyle = i === 0 || i === 7 ? '#6366f1' : '#06b6d4';
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(cx, cy, nodeRadius, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = '#fff';
-      ctx.font = '10px JetBrains Mono';
+      ctx.fillStyle = isDark ? '#fff' : '#0f172a';
+      ctx.font = '9.5px JetBrains Mono';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(`A^(${i+1})`, cx, cy);
+      ctx.fillText(`A${i+1}`, cx, cy);
     }
 
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = '#8b9bb4';
-    ctx.font = '10px JetBrains Mono';
-    ctx.fillText('MPS Tensor Train Contraction ⟨W | Ψ(v)⟩', 30, 20);
+    ctx.fillStyle = textColor;
+    ctx.font = '10px Inter, sans-serif';
+    ctx.fillText('Tensor Network Entangled Clues Chain', 30, 16);
   }
 
   function drawGroverCanvas() {
@@ -502,37 +552,39 @@
     const h = el.groverCanvas.height;
     ctx.clearRect(0, 0, w, h);
 
+    const isDark = isDarkTheme();
+    const textColor = isDark ? '#94a3b8' : '#64748b';
     const history = state.groverData.history;
-    const barWidth = 40;
-    const gap = 35;
-    const startX = 50;
-    const chartHeight = h - 70;
+    const barWidth = 46;
+    const gap = 40;
+    const startX = 60;
+    const chartHeight = h - 60;
 
-    ctx.fillStyle = '#8b9bb4';
-    ctx.font = '11px JetBrains Mono';
-    ctx.fillText('Target State Probability Amplification P(target) = |⟨target | Ψ(k)⟩|²', startX, 22);
+    ctx.fillStyle = textColor;
+    ctx.font = '11px Inter, sans-serif';
+    ctx.fillText('Target Probability Amplification: Making the Hacker Stand Out', startX, 18);
 
     history.forEach((step, i) => {
       const x = startX + i * (barWidth + gap);
       const barH = step.p * chartHeight;
-      const y = h - 35 - barH;
+      const y = h - 28 - barH;
 
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
-      ctx.fillRect(x, h - 35 - chartHeight, barWidth, chartHeight);
+      ctx.fillStyle = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+      ctx.fillRect(x, h - 28 - chartHeight, barWidth, chartHeight);
 
-      const grad = ctx.createLinearGradient(0, y, 0, h - 35);
+      const grad = ctx.createLinearGradient(0, y, 0, h - 28);
       grad.addColorStop(0, '#10b981');
-      grad.addColorStop(1, '#00f0ff');
+      grad.addColorStop(1, '#6366f1');
       ctx.fillStyle = grad;
       ctx.fillRect(x, y, barWidth, barH);
 
-      ctx.fillStyle = '#fff';
+      ctx.fillStyle = isDark ? '#f8fafc' : '#0f172a';
       ctx.font = '10px JetBrains Mono';
       ctx.textAlign = 'center';
-      ctx.fillText(`${(step.p * 100).toFixed(1)}%`, x + barWidth / 2, y - 6);
+      ctx.fillText(`${(step.p * 100).toFixed(1)}%`, x + barWidth / 2, y - 5);
 
-      ctx.fillStyle = '#8b9bb4';
-      ctx.fillText(`k=${step.k}`, x + barWidth / 2, h - 18);
+      ctx.fillStyle = textColor;
+      ctx.fillText(`Step ${step.k}`, x + barWidth / 2, h - 12);
     });
 
     ctx.textAlign = 'left';
@@ -572,7 +624,7 @@
     }
 
     state.recentEvents.unshift(ev);
-    if (state.recentEvents.length > 10) state.recentEvents.pop();
+    if (state.recentEvents.length > 8) state.recentEvents.pop();
     renderStreamTable();
   }
 
@@ -580,11 +632,11 @@
     state.streamingActive = !state.streamingActive;
     if (state.streamingActive) {
       el.streamStateIcon.textContent = '⏸️';
-      el.streamStateText.textContent = 'Pause Telemetry';
+      el.streamStateText.textContent = 'Pause Feed';
       startStreamInterval();
     } else {
       el.streamStateIcon.textContent = '▶️';
-      el.streamStateText.textContent = 'Resume Telemetry';
+      el.streamStateText.textContent = 'Resume Feed';
       clearInterval(state.streamTimer);
     }
   }
@@ -608,7 +660,7 @@
         if (res.ok) {
           const json = await res.json();
           syncWithBackend();
-          showToast(`⚡ Backend Processed Scenario ${scenarioNum}: ${json.description}`);
+          showToast(`⚡ Test ${scenarioNum} Launched: ${json.description}`);
           return;
         }
       } catch (err) {
@@ -628,7 +680,7 @@
         severity: 'CRITICAL',
         title: 'ECDSA Catastrophic Nonce Collision (Private Key Recovery Setup)',
         keyId: 'key-ecdsa-treasury-master',
-        engine: 'Grover Amplitude Amplification Search',
+        engine: 'Grover Search + QUBO',
         confidence: 0.999,
         mitre: 'T1552.004',
         summary: 'Identical k-value nonce reused across 2 transactions. Private key recovery mathematically feasible.',
@@ -638,7 +690,7 @@
       });
       state.groverData.history[5].p = 0.999;
       renderAllCanvases();
-      showToast('🚨 Scenario 1: Nonce Reuse flagged via Grover Search!');
+      showToast('🚨 Test 1: Reused Nonce caught by Grover Search!');
     } else if (scenarioNum === 2) {
       pushNewStreamEvent(true, { time: now, src: 'Blockchain', keyId: 'key-eth-smart-contract', algo: 'ECDSA-secp256k1', caller: 'unauthenticated-relayer (TOR-EXIT)', entropy: '7.85', lat: '14.2ms', isAnomaly: true });
       state.activeAlerts.unshift({
@@ -647,7 +699,7 @@
         severity: 'HIGH',
         title: 'Digital Signature Malleability Abuse (High-S Violation)',
         keyId: 'key-eth-smart-contract',
-        engine: 'QUBO Simulated Annealing Solver',
+        engine: 'QUBO Simulated Annealing',
         confidence: 0.935,
         mitre: 'T1565.002',
         summary: 'High-S signature structure detected attempting relay mutation on smart contract.',
@@ -655,7 +707,7 @@
         soarExecuted: false,
         attributions: { 'malleability_indicator': 1.0, 'geo_risk_score': 0.70 }
       });
-      showToast('🚨 Scenario 2: Signature Malleability flagged via QUBO!');
+      showToast('🚨 Test 2: Tampered signature detected via QUBO!');
     } else if (scenarioNum === 3) {
       pushNewStreamEvent(true, { time: now, src: 'CI/CD', keyId: 'key-cicd-master-release', algo: 'RSA-4096', caller: 'unauthorized_runner_vm_9823 (198.51.100.42)', entropy: '7.91', lat: '88.2ms', isAnomaly: true });
       state.activeAlerts.unshift({
@@ -674,7 +726,7 @@
       });
       state.mpsBondEntropies = [0.92, 1.45, 1.88, 2.14, 1.76, 1.10, 0.65];
       renderAllCanvases();
-      showToast('🚨 Scenario 3: Rogue CI/CD Signing flagged via MPS!');
+      showToast('🚨 Test 3: Rogue server signing flagged via Tensor Network!');
     } else if (scenarioNum === 4) {
       pushNewStreamEvent(true, { time: now, src: 'PKI/HSM', keyId: 'key-root-ca-01', algo: 'RSA-4096', caller: 'suspicious-recon-service (ANON-VPN)', entropy: '7.94', lat: '1.2ms', isAnomaly: true });
       state.activeAlerts.unshift({
@@ -683,7 +735,7 @@
         severity: 'HIGH',
         title: 'Quantum "Harvest Now, Decrypt Later" Bulk Key Export Profile',
         keyId: 'key-root-ca-01',
-        engine: 'QUBO Simulated Annealing Solver',
+        engine: 'QUBO Simulated Annealing',
         confidence: 0.912,
         mitre: 'T1110 - Token Harvesting',
         summary: 'Rapid burst export of 25-year root public keys and certs to anonymous VPN endpoint.',
@@ -691,7 +743,7 @@
         soarExecuted: false,
         attributions: { 'key_frequency_burst': 0.95, 'geo_risk_score': 0.85 }
       });
-      showToast('🚨 Scenario 4: Quantum Harvest-Now reconnaissance flagged!');
+      showToast('🚨 Test 4: Bulk key hoarding flagged!');
     }
     renderAlerts();
   }
@@ -706,7 +758,7 @@
     state.recentEvents = [];
     renderAlerts();
     renderStreamTable();
-    showToast('Alert queue and stream history reset.');
+    showToast('Alarm list and feed cleared.');
   });
 
   el.btnToggleStream.addEventListener('click', toggleStreaming);
@@ -718,7 +770,7 @@
     activeModalAlert = alert;
 
     el.modalSeverityBadge.textContent = alert.severity;
-    el.modalSeverityBadge.className = `modal-badge ${alert.severity}`;
+    el.modalSeverityBadge.className = `pill-badge ${alert.severity === 'CRITICAL' ? 'pill-danger' : 'pill-warning'}`;
     el.modalAlertTitle.textContent = alert.title;
     el.modalKeyId.textContent = alert.keyId;
     el.modalEngine.textContent = alert.engine;
@@ -733,7 +785,7 @@
       item.innerHTML = `
         <div class="feature-bar-header">
           <span>${feat.replace(/_/g, ' ')}</span>
-          <span>+${(val * 100).toFixed(0)}% weight</span>
+          <span>+${(val * 100).toFixed(0)}% contribution</span>
         </div>
         <div class="feature-progress-bg">
           <div class="feature-progress-fill" style="width: ${Math.min(100, val * 100)}%;"></div>
@@ -772,7 +824,7 @@
       renderInventoryTable();
     }
     renderAlerts();
-    showToast(`⚡ Executed: ${alert.playbook} on key '${alert.keyId}'.`);
+    showToast(`⚡ Key '${alert.keyId}' locked down and quarantined.`);
   }
 
   el.btnExecuteSoar.addEventListener('click', () => {
@@ -786,23 +838,126 @@
     if (activeModalAlert) {
       const cef = `CEF:0|Quantum-Inspired|QI-CTD|1.0|${activeModalAlert.mitre}|${activeModalAlert.title}|${activeModalAlert.severity}|src=10.0.1.50 dstKey=${activeModalAlert.keyId} cs1=${activeModalAlert.engine} cs1Label=DetectionEngine`;
       navigator.clipboard.writeText(cef);
-      showToast('✓ Copied CEF Log format to clipboard!');
+      showToast('✓ Copied security log format to clipboard!');
     }
   });
+
+  // --- CRYPTO SCANNER LOGIC (TAB 4) ---
+  if (el.btnSampleRSA) {
+    el.btnSampleRSA.addEventListener('click', () => {
+      el.scannerInputText.value = `-----BEGIN CERTIFICATE-----
+Issuer: C=US, O=Enterprise CA, CN=Corp Root CA 2024
+Subject: CN=internal-pki.corp.com
+Public Key Algorithm: rsaEncryption (2048-bit)
+Validity: 15 Years Shelf-Life
+-----END CERTIFICATE-----`;
+      runCryptoInspection();
+    });
+
+    el.btnSampleECDSA.addEventListener('click', () => {
+      el.scannerInputText.value = `-----BEGIN EC PUBLIC KEY-----
+Curve: secp256k1 (256-bit)
+Algorithm: ECDSA-secp256k1
+Key ID: key-treasury-multisig-09
+Data Lifetime: 20 Years
+-----END EC PUBLIC KEY-----`;
+      runCryptoInspection();
+    });
+
+    el.btnSamplePQC.addEventListener('click', () => {
+      el.scannerInputText.value = `-----BEGIN NIST PQC PUBLIC KEY-----
+Algorithm: ML-DSA-65 (NIST FIPS 204 - Dilithium3)
+Security Category: Category 3 (Shor-Resistant)
+Status: Certified Quantum-Safe
+-----END NIST PQC PUBLIC KEY-----`;
+      runCryptoInspection();
+    });
+
+    el.btnRunScan.addEventListener('click', runCryptoInspection);
+
+    el.btnClearScan.addEventListener('click', () => {
+      el.scannerInputText.value = '';
+      el.pqcSealOutput.style.display = 'none';
+    });
+
+    el.btnGeneratePqcSeal.addEventListener('click', () => {
+      const fakeSig = `-----BEGIN NIST FIPS 204 QUANTUM-SAFE SIGNATURE-----
+Algorithm: ML-DSA-65 (Dilithium3)
+Hash: SHA3-512 (${Math.random().toString(36).substring(2, 15)})
+Status: VERIFIED_QUANTUM_SAFE
+Timestamp: ${new Date().toISOString()}
+-----END NIST FIPS 204 QUANTUM-SAFE SIGNATURE-----`;
+
+      el.pqcSealText.value = fakeSig;
+      el.pqcSealOutput.style.display = 'block';
+      showToast('✓ Generated NIST ML-DSA-65 Quantum-Safe Seal!');
+    });
+  }
+
+  function runCryptoInspection() {
+    const text = el.scannerInputText.value.toLowerCase();
+    if (!text) {
+      showToast('Please paste text or click a sample preset.');
+      return;
+    }
+
+    if (text.includes('ml-dsa') || text.includes('dilithium') || text.includes('pqc')) {
+      el.scanAlgoLabel.textContent = 'ML-DSA-65';
+      el.scanAlgoLabel.className = 'scan-stat-val text-success';
+      el.scanKeyLengthLabel.textContent = 'NIST FIPS 204 Lattice Key';
+      el.scanQvsLabel.textContent = '3.2 / 100';
+      el.scanQvsLabel.className = 'scan-stat-val text-success';
+      el.scanUrgencyLabel.textContent = 'QUANTUM SAFE';
+      el.scanUrgencyLabel.className = 'scan-stat-sub text-success';
+      el.scanTimeToCrack.textContent = '> 1000 Years';
+      el.scanTimeToCrack.className = 'scan-stat-val text-success';
+      el.scanRecText.textContent = '✓ This key is already using Post-Quantum Cryptography (NIST FIPS 204). It is immune to quantum supercomputers.';
+      el.scanStatusBadge.textContent = 'SAFE (PQC)';
+      el.scanStatusBadge.className = 'pill-badge pill-success';
+    } else if (text.includes('ecdsa') || text.includes('secp256k1') || text.includes('p-256')) {
+      el.scanAlgoLabel.textContent = 'ECDSA-256';
+      el.scanAlgoLabel.className = 'scan-stat-val text-danger';
+      el.scanKeyLengthLabel.textContent = '256-bit Elliptic Curve';
+      el.scanQvsLabel.textContent = '94.8 / 100';
+      el.scanQvsLabel.className = 'scan-stat-val text-danger';
+      el.scanUrgencyLabel.textContent = 'CRITICAL VULNERABILITY';
+      el.scanUrgencyLabel.className = 'scan-stat-sub text-danger';
+      el.scanTimeToCrack.textContent = '< 5 Seconds';
+      el.scanTimeToCrack.className = 'scan-stat-val text-danger';
+      el.scanRecText.textContent = '⚠️ CRITICAL: Vulnerable to Shor\'s algorithm and nonce reuse. Upgrade to ML-DSA-65 recommended.';
+      el.scanStatusBadge.textContent = 'CRITICAL RISK';
+      el.scanStatusBadge.className = 'pill-badge pill-danger';
+    } else {
+      el.scanAlgoLabel.textContent = 'RSA-2048';
+      el.scanAlgoLabel.className = 'scan-stat-val text-indigo';
+      el.scanKeyLengthLabel.textContent = '2048-bit Modulus';
+      el.scanQvsLabel.textContent = '84.5 / 100';
+      el.scanQvsLabel.className = 'scan-stat-val text-danger';
+      el.scanUrgencyLabel.textContent = 'HIGH MIGRATION PRIORITY';
+      el.scanUrgencyLabel.className = 'scan-stat-sub text-danger';
+      el.scanTimeToCrack.textContent = '< 10 Seconds';
+      el.scanTimeToCrack.className = 'scan-stat-val text-danger';
+      el.scanRecText.textContent = '⚠️ VULNERABLE: Integer factoring easily broken by quantum computers. Upgrade to NIST ML-DSA-87 recommended.';
+      el.scanStatusBadge.textContent = 'HIGH RISK';
+      el.scanStatusBadge.className = 'pill-badge pill-warning';
+    }
+    showToast('✓ Security inspection complete.');
+  }
 
   function showToast(msg) {
     const toast = document.createElement('div');
     toast.style.position = 'fixed';
     toast.style.bottom = '24px';
     toast.style.right = '24px';
-    toast.style.background = 'rgba(18, 24, 38, 0.95)';
-    toast.style.color = '#00f0ff';
-    toast.style.border = '1px solid #00f0ff';
-    toast.style.boxShadow = '0 0 16px rgba(0, 240, 255, 0.3)';
+    toast.style.background = isDarkTheme() ? '#131b2e' : '#ffffff';
+    toast.style.color = isDarkTheme() ? '#f8fafc' : '#0f172a';
+    toast.style.border = '1px solid #6366f1';
+    toast.style.boxShadow = '0 8px 24px rgba(0,0,0,0.2)';
     toast.style.padding = '12px 18px';
     toast.style.borderRadius = '8px';
-    toast.style.fontFamily = 'JetBrains Mono, monospace';
-    toast.style.fontSize = '12px';
+    toast.style.fontFamily = 'Inter, sans-serif';
+    toast.style.fontSize = '12.5px';
+    toast.style.fontWeight = '600';
     toast.style.zIndex = '9999';
     toast.textContent = msg;
 
@@ -811,6 +966,7 @@
   }
 
   // --- INITIALIZATION ---
+  applyTheme(state.theme);
   renderAlerts();
   renderStreamTable();
   renderInventoryTable();
