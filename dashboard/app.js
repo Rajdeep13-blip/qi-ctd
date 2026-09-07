@@ -320,7 +320,11 @@
       item.innerHTML = `
         <div class="alert-head-row">
           <div class="alert-badge-wrap">
-            <span class="alert-badge ${alert.severity}"><span class="pulse-dot-red"></span> ${alert.severity} THREAT</span>
+            ${
+              alert.soarExecuted
+                ? `<span class="alert-badge SOAR-RESOLVED">✓ SECURED (PQC LOCKED)</span>`
+                : `<span class="alert-badge ${alert.severity}"><span class="pulse-dot-red"></span> ${alert.severity} THREAT</span>`
+            }
             <span class="alert-mitre-tag">${alert.mitre || 'MITRE T1552'}</span>
           </div>
           <span class="alert-time">⏱️ ${alert.time}</span>
