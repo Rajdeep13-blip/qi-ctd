@@ -146,7 +146,7 @@ class QICTDEngine:
             if existing.event_id == alert.event_id and existing.attack_type == alert.attack_type:
                 return
 
-        self.active_alerts.insert(0, alert)
+        self.active_alerts.insert(0, alert) 
         self.total_anomalies_detected += 1
         if len(self.active_alerts) > 100:
             self.active_alerts = self.active_alerts[:100]

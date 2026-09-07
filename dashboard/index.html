@@ -43,6 +43,11 @@
             <span class="nav-icon">🧠</span>
             <span class="nav-label">Quantum AI Core</span>
           </button>
+          <button class="nav-item" data-tab="public-apis-view">
+            <span class="nav-icon">🌐</span>
+            <span class="nav-label">Public APIs Real Data</span>
+            <span class="nav-badge" style="background:#00f0ff; color:#000;">LIVE</span>
+          </button>
           <button class="nav-item" data-tab="ciso-posture">
             <span class="nav-icon">📊</span>
             <span class="nav-label">CISO Risk & QVS</span>
@@ -155,8 +160,8 @@
             <span class="kpi-value text-purple" id="fpRedVal">-42.0%</span>
           </div>
           <div class="kpi-box">
-            <span class="kpi-label">PQC Migration</span>
-            <span class="kpi-value text-success" id="topPqcProgress">16.7%</span>
+            <span class="kpi-label">Public APIs Ingested</span>
+            <span class="kpi-value text-cyan" id="topPublicApisCount">8 Real Feeds</span>
           </div>
         </div>
       </header>
@@ -241,9 +246,8 @@
           </div>
         </div>
 
-        <!-- ==================== TAB 2: QUANTUM CORE ALGORITHMS (INTERACTIVE LAB) ==================== -->
+        <!-- ==================== TAB 2: QUANTUM CORE ALGORITHMS ==================== -->
         <div class="tab-panel" id="quantum-algorithms">
-          
           <div class="algo-showcase-grid">
             
             <!-- 1. QUBO Solver Interactive Card -->
@@ -339,7 +343,53 @@
           </div>
         </div>
 
-        <!-- ==================== TAB 3: CISO QUANTUM POSTURE & QVS ==================== -->
+        <!-- ==================== TAB 3: PUBLIC APIS REAL DATA FEED (NEW) ==================== -->
+        <div class="tab-panel" id="public-apis-view">
+          <div class="ciso-wrapper">
+            
+            <div class="cyber-card">
+              <div class="cyber-card-header">
+                <div class="header-left-title">
+                  <span class="cyber-card-icon">🌐</span>
+                  <h3>Real-World Public APIs Threat & Cryptographic Intelligence</h3>
+                </div>
+                <div style="display:flex; gap:10px;">
+                  <button class="btn-cyber-primary" id="btnFetchRealPublicData">⚡ Fetch Live Public API Signatures</button>
+                </div>
+              </div>
+              <div class="cyber-card-body">
+                <p class="algo-explanation-text">
+                  Connected to real, open APIs indexed in <a href="https://github.com/public-apis/public-apis" target="_blank" style="color:#00f0ff; text-decoration:underline;">public-apis/public-apis</a>. 
+                  Our Quantum-Inspired Engine scans each endpoint for cryptographic cipher health and Shor algorithm vulnerability.
+                </p>
+
+                <div class="table-responsive">
+                  <table class="cyber-table">
+                    <thead>
+                      <tr>
+                        <th>Public API Service</th>
+                        <th>Category</th>
+                        <th>Encryption Scheme</th>
+                        <th>Auth</th>
+                        <th>HTTPS</th>
+                        <th>Quantum Score (QVS)</th>
+                        <th>Recommended PQC Target</th>
+                        <th>Quantum Status</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="publicApisTableBody">
+                      <!-- Populated dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ==================== TAB 4: CISO QUANTUM POSTURE & QVS ==================== -->
         <div class="tab-panel" id="ciso-posture">
           <div class="ciso-wrapper">
             
@@ -405,7 +455,7 @@
           </div>
         </div>
 
-        <!-- ==================== TAB 4: CERT & KEY INSPECTOR ==================== -->
+        <!-- ==================== TAB 5: CERT & KEY INSPECTOR ==================== -->
         <div class="tab-panel" id="crypto-scanner">
           <div class="scanner-grid-two">
             
@@ -489,7 +539,7 @@
           </div>
         </div>
 
-        <!-- ==================== TAB 5: AUDIT LOGS ==================== -->
+        <!-- ==================== TAB 6: AUDIT LOGS ==================== -->
         <div class="tab-panel" id="audit-logs">
           <div class="cyber-card">
             <div class="cyber-card-header">

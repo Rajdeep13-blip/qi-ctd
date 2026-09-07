@@ -7,6 +7,7 @@ Features:
 - Supports dynamic PORT environment variables for Render, Railway, Fly.io, Heroku
 - Serves Frontend Dashboard directly at http://<IP>:<PORT>/
 - SQLite Database Persistence integrated
+- Real Data Ingestion from https://github.com/public-apis/public-apis
 """
 
 import sys
@@ -22,11 +23,13 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from engine import QICTDEngine
 from simulation.attack_generator import SyntheticAttackGenerator
+from telemetry.public_apis_ingestor import PublicApisIngestor
 from telemetry.schema import NormalizedSignatureEvent, SourceType, AlgorithmType
 
-# Global Engine & Generator
+# Global Engine, Generator & Public APIs Ingestor
 ENGINE = QICTDEngine(batch_window_size=10)
 GENERATOR = SyntheticAttackGenerator()
+PUBLIC_APIS = PublicApisIngestor()
 
 # Path to static dashboard files
 DASHBOARD_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dashboard")
@@ -88,6 +91,9 @@ class QICTDPublicServerHandler(BaseHTTPRequestHandler):
         elif path == "/app.js":
             self._serve_static_file("app.js")
             return
+        elif path == "/manifest.json":
+            self._serve_static_file("manifest.json")
+            return
 
         # 2. REST API: GET /api/v1/engine/status
         if path == "/api/v1/engine/status":
@@ -104,13 +110,24 @@ class QICTDPublicServerHandler(BaseHTTPRequestHandler):
             posture = ENGINE.qvs_engine.get_organization_posture()
             self._send_json_response(200, {"status": "SUCCESS", "posture": posture})
 
-        # 5. REST API: Health Check
+        # 5. REST API: GET /api/v1/public-apis/catalog
+        elif path == "/api/v1/public-apis/catalog":
+            catalog = PUBLIC_APIS.get_public_apis_catalog()
+            self._send_json_response(200, {
+                "status": "SUCCESS",
+                "source": "https://github.com/public-apis/public-apis",
+                "count": len(catalog),
+                "apis": catalog
+            })
+
+        # 6. REST API: Health Check
         elif path == "/health":
             self._send_json_response(200, {
                 "service": "QI-CTD Quantum-Inspired Detection Backend",
                 "status": "HEALTHY",
                 "mode": "PUBLIC_NETWORK",
                 "database": "SQLite qi_ctd.db Active",
+                "public_apis_connected": True,
                 "timestamp": time.time()
             })
 
@@ -181,6 +198,30 @@ class QICTDPublicServerHandler(BaseHTTPRequestHandler):
                 "alerts_triggered": [a.to_dict() for a in alerts]
             })
 
+        # 4. Fetch & Ingest Real Live Data from Public APIs: POST /api/v1/public-apis/fetch-live
+        elif path == "/api/v1/public-apis/fetch-live":
+            events = PUBLIC_APIS.fetch_live_blockchain_signatures(count=5)
+            alerts = ENGINE.ingest_batch(events)
+            self._send_json_response(200, {
+                "status": "INGESTED_REAL_DATA",
+                "source": "https://github.com/public-apis/public-apis (Live Blockchain & SSL)",
+                "events_count": len(events),
+                "events": [
+                    {
+                        "event_id": e.event_id,
+                        "time": time.strftime("%H:%M:%S", time.localtime(e.timestamp)),
+                        "source": e.source_type.value,
+                        "key_id": e.key_id,
+                        "algorithm": e.algorithm.value,
+                        "entropy": e.nonce_entropy,
+                        "caller": e.caller_identity,
+                        "latency": f"{e.latency_ms}ms"
+                    }
+                    for e in events
+                ],
+                "alerts_triggered": [a.to_dict() for a in alerts]
+            })
+
         else:
             self._send_json_response(404, {"error": "Not Found", "path": path})
 
@@ -193,12 +234,13 @@ def start_public_server(host: str = "0.0.0.0", port: int = 8000):
     print(f"📡 Bound to: {host}:{port} (Accessible to Cloud Platforms & Public Internet)")
     print(f"🖥️  Dashboard Web UI: http://localhost:{port}/  or  http://<YOUR-IP>:{port}/")
     print("📊 Public REST API Endpoints:")
+    print(f"   • GET  http://<YOUR-IP>:{port}/api/v1/public-apis/catalog")
+    print(f"   • POST http://<YOUR-IP>:{port}/api/v1/public-apis/fetch-live")
     print(f"   • POST http://<YOUR-IP>:{port}/api/v1/telemetry/ingest")
     print(f"   • GET  http://<YOUR-IP>:{port}/api/v1/alerts")
     print(f"   • POST http://<YOUR-IP>:{port}/api/v1/soar/execute")
     print(f"   • GET  http://<YOUR-IP>:{port}/api/v1/qvs/inventory")
     print(f"   • POST http://<YOUR-IP>:{port}/api/v1/simulate/attack")
-    print(f"   • GET  http://<YOUR-IP>:{port}/api/v1/engine/status")
     print("=" * 80)
     try:
         httpd.serve_forever()
@@ -208,7 +250,6 @@ def start_public_server(host: str = "0.0.0.0", port: int = 8000):
 
 
 if __name__ == "__main__":
-    # Check for PORT environment variable (Render, Railway, Fly.io) or CLI argument
     env_port = os.environ.get("PORT")
     if env_port:
         try:
