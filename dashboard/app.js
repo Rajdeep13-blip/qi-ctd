@@ -1,7 +1,6 @@
 /**
- * QI-CTD Simplified, Clean Dashboard Application
- * Real-Time Quantum-Inspired Threat Detection & Posture Orchestration
- * (Includes 1-Click Light/Dark Theme Switcher, Real-Time Streaming, and Crypto Scanner)
+ * QI-CTD Cyberpunk Dark Dashboard with Left Sidebar Layout
+ * Real-Time Quantum-Inspired Threat Detection & Automated SOAR Orchestration
  */
 
 (function () {
@@ -19,7 +18,6 @@
 
   // --- STATE ---
   const state = {
-    theme: localStorage.getItem('qi_theme') || 'dark',
     backendConnected: false,
     streamingActive: true,
     streamTimer: null,
@@ -53,7 +51,7 @@
     ]
   };
 
-  // Initial Sample Alerts
+  // Initial Alerts
   state.activeAlerts = [
     {
       id: 'alt-84f9a1',
@@ -61,10 +59,10 @@
       severity: 'CRITICAL',
       title: 'ECDSA Nonce Collision Detected (Catastrophic Key Recovery Threat)',
       keyId: 'key-ecdsa-treasury-master',
-      engine: 'Grover Search + QUBO',
+      engine: 'Grover Amplitude Search + QUBO',
       confidence: 0.999,
       mitre: 'T1552.004',
-      summary: 'Identical k-value nonce reused across 2 transactions. Private key recovery mathematically feasible.',
+      summary: 'Identical k-value nonce reused across 2 blockchain transactions from differing IP origins.',
       playbook: 'Emergency Key Revocation & CA Invalidation',
       soarExecuted: false,
       attributions: { 'nonce_collision_entropy': 0.98, 'cross_ip_divergence': 0.85, 'geo_risk_score': 0.72 }
@@ -99,7 +97,7 @@
     }
   ];
 
-  // Initial Stream Rows
+  // Initial Stream
   state.recentEvents = [
     { time: '00:38:50', src: 'PKI/HSM', keyId: 'key-pki-hsm-04', algo: 'ECDSA-P256', caller: 'svc-worker-21 (10.0.1.73)', entropy: '7.97', lat: '4.6ms', isAnomaly: false },
     { time: '00:38:29', src: 'Blockchain', keyId: 'key-blockchain-82', algo: 'ECDSA-P256', caller: 'svc-worker-37 (10.0.1.98)', entropy: '7.98', lat: '3.8ms', isAnomaly: false },
@@ -110,13 +108,13 @@
 
   // DOM Elements
   const el = {
-    btnThemeToggle: document.getElementById('btnThemeToggle'),
-    themeToggleIcon: document.getElementById('themeToggleIcon'),
     systemStateText: document.getElementById('systemStateText'),
-    tabBtns: document.querySelectorAll('.nav-pill'),
-    tabContents: document.querySelectorAll('.tab-panel'),
+    currentTabHeading: document.getElementById('currentTabHeading'),
+    sidebarNavItems: document.querySelectorAll('.nav-item'),
+    tabPanels: document.querySelectorAll('.tab-panel'),
     alertsContainer: document.getElementById('alertsContainer'),
     activeAlertCount: document.getElementById('activeAlertCount'),
+    sidebarAlertBadge: document.getElementById('sidebarAlertBadge'),
     telemetryStreamBody: document.getElementById('telemetryStreamBody'),
     totalIngestedCount: document.getElementById('totalIngestedCount'),
     totalAnomaliesCount: document.getElementById('totalAnomaliesCount'),
@@ -124,10 +122,13 @@
     inventoryTableBody: document.getElementById('inventoryTableBody'),
     orgAvgQvs: document.getElementById('orgAvgQvs'),
     pqcProgressPct: document.getElementById('pqcProgressPct'),
+    topPqcProgress: document.getElementById('topPqcProgress'),
+    // Sidebar Control Buttons
     btnToggleStream: document.getElementById('btnToggleStream'),
     streamStateIcon: document.getElementById('streamStateIcon'),
     streamStateText: document.getElementById('streamStateText'),
     btnResetData: document.getElementById('btnResetData'),
+    btnQuarantineAll: document.getElementById('btnQuarantineAll'),
     // Attack buttons
     btnAttackNonce: document.getElementById('btnAttackNonce'),
     btnAttackMalleability: document.getElementById('btnAttackMalleability'),
@@ -146,6 +147,7 @@
     modalPlaybookName: document.getElementById('modalPlaybookName'),
     btnExecuteSoar: document.getElementById('btnExecuteSoar'),
     btnExportCef: document.getElementById('btnExportCef'),
+    btnExportAllAudit: document.getElementById('btnExportAllAudit'),
     // Canvases
     quboCanvas: document.getElementById('quboCanvas'),
     mpsCanvas: document.getElementById('mpsCanvas'),
@@ -171,26 +173,13 @@
 
   let activeModalAlert = null;
 
-  // --- THEME MANAGEMENT ---
-  function applyTheme(themeName) {
-    state.theme = themeName;
-    localStorage.setItem('qi_theme', themeName);
-    if (themeName === 'light') {
-      document.body.className = 'theme-light';
-      if (el.themeToggleIcon) el.themeToggleIcon.textContent = '🌙 Dark Mode';
-    } else {
-      document.body.className = 'theme-dark';
-      if (el.themeToggleIcon) el.themeToggleIcon.textContent = '☀️ Light Mode';
-    }
-    renderAllCanvases();
-  }
-
-  if (el.btnThemeToggle) {
-    el.btnThemeToggle.addEventListener('click', () => {
-      const newTheme = state.theme === 'dark' ? 'light' : 'dark';
-      applyTheme(newTheme);
-    });
-  }
+  const tabTitles = {
+    'soc-view': 'SOC Real-Time Threat Center',
+    'quantum-algorithms': 'Quantum-Inspired AI Algorithmic Engines',
+    'ciso-posture': 'CISO Enterprise Quantum Posture & QVS',
+    'crypto-scanner': 'Cryptographic Certificate & Key Inspector',
+    'audit-logs': 'Cryptographic SOAR Incident Audit Trail'
+  };
 
   // --- BACKEND HEALTH CHECK & SYNC ---
   async function checkBackendConnection() {
@@ -198,13 +187,13 @@
       const res = await fetch(`${BACKEND_URL}/health`, { method: 'GET', signal: AbortSignal.timeout(2000) });
       if (res.ok) {
         state.backendConnected = true;
-        if (el.systemStateText) el.systemStateText.innerHTML = `Live Python Server Connected`;
+        if (el.systemStateText) el.systemStateText.innerHTML = `BACKEND ONLINE (${BACKEND_URL})`;
         syncWithBackend();
         return;
       }
     } catch (e) {}
     state.backendConnected = false;
-    if (el.systemStateText) el.systemStateText.textContent = `Standby / Ready`;
+    if (el.systemStateText) el.systemStateText.textContent = `STANDALONE ACTIVE`;
   }
 
   async function syncWithBackend() {
@@ -242,18 +231,24 @@
         }
       }
     } catch (err) {
-      console.warn('Backend sync failed:', err);
+      console.warn('Backend sync error:', err);
     }
   }
 
-  // --- TAB SWITCHING ---
-  el.tabBtns.forEach(btn => {
+  // --- SIDEBAR TAB SWITCHING ---
+  el.sidebarNavItems.forEach(btn => {
     btn.addEventListener('click', () => {
-      el.tabBtns.forEach(b => b.classList.remove('active'));
-      el.tabContents.forEach(c => c.classList.remove('active'));
+      el.sidebarNavItems.forEach(b => b.classList.remove('active'));
+      el.tabPanels.forEach(p => p.classList.remove('active'));
       btn.classList.add('active');
+
       const targetId = btn.getAttribute('data-tab');
-      document.getElementById(targetId).classList.add('active');
+      const targetPanel = document.getElementById(targetId);
+      if (targetPanel) targetPanel.classList.add('active');
+
+      if (el.currentTabHeading && tabTitles[targetId]) {
+        el.currentTabHeading.textContent = tabTitles[targetId];
+      }
 
       if (targetId === 'quantum-algorithms') {
         renderAllCanvases();
@@ -265,39 +260,40 @@
   function renderAlerts() {
     el.alertsContainer.innerHTML = '';
     const pendingCount = state.activeAlerts.filter(a => !a.soarExecuted).length;
-    el.activeAlertCount.textContent = `${pendingCount} Pending`;
+    if (el.activeAlertCount) el.activeAlertCount.textContent = `${pendingCount} Pending`;
+    if (el.sidebarAlertBadge) el.sidebarAlertBadge.textContent = pendingCount;
 
     state.activeAlerts.forEach(alert => {
       const item = document.createElement('div');
-      item.className = `alert-card-item severity-${alert.severity} ${alert.soarExecuted ? 'soar-executed' : ''}`;
+      item.className = `alert-item-box severity-${alert.severity} ${alert.soarExecuted ? 'soar-executed' : ''}`;
       item.innerHTML = `
-        <div class="alert-top-row">
-          <span class="pill-badge ${alert.severity === 'CRITICAL' ? 'pill-danger' : 'pill-warning'}">${alert.severity} THREAT</span>
-          <span style="font-size:11px; color:var(--text-soft); font-family:var(--font-mono);">${alert.time}</span>
+        <div class="alert-head-row">
+          <span class="alert-badge ${alert.severity}">${alert.severity} THREAT</span>
+          <span class="alert-time">${alert.time}</span>
         </div>
         <div class="alert-title-text">${alert.title}</div>
-        <div class="alert-meta-tags">
+        <div class="alert-meta-details">
           <span><strong>Target Key:</strong> ${alert.keyId}</span>
-          <span><strong>AI Engine:</strong> ${alert.engine}</span>
+          <span><strong>Engine:</strong> ${alert.engine}</span>
           <span><strong>Certainty:</strong> ${(alert.confidence * 100).toFixed(1)}%</span>
         </div>
-        <div class="alert-action-footer">
-          <button class="btn-view-clues" data-id="${alert.id}">🔍 View AI Clues</button>
+        <div class="alert-action-row">
+          <button class="btn-cyber-triage" data-id="${alert.id}">🔍 View Clues & Math</button>
           ${
             alert.soarExecuted
-              ? `<span style="font-size:12px; color:var(--accent-success); font-weight:700;">✓ Threat Neutralized</span>`
-              : `<button class="btn-lockdown" data-id="${alert.id}">⚡ Quarantine Key</button>`
+              ? `<span class="soar-done-tag">✓ SOAR Neutralized</span>`
+              : `<button class="btn-cyber-alert" data-id="${alert.id}">⚡ Quarantine Key</button>`
           }
         </div>
       `;
       el.alertsContainer.appendChild(item);
     });
 
-    el.alertsContainer.querySelectorAll('.btn-view-clues').forEach(b => {
+    el.alertsContainer.querySelectorAll('.btn-cyber-triage').forEach(b => {
       b.addEventListener('click', () => openModal(b.getAttribute('data-id')));
     });
 
-    el.alertsContainer.querySelectorAll('.btn-lockdown').forEach(b => {
+    el.alertsContainer.querySelectorAll('.btn-cyber-alert').forEach(b => {
       b.addEventListener('click', () => executeSoarDirect(b.getAttribute('data-id')));
     });
   }
@@ -307,15 +303,16 @@
     el.telemetryStreamBody.innerHTML = '';
     state.recentEvents.forEach(ev => {
       const row = document.createElement('tr');
-      if (ev.isAnomaly) row.className = 'row-threat';
+      if (ev.isAnomaly) row.className = 'row-anomaly';
       row.innerHTML = `
         <td>${ev.time}</td>
         <td><strong>${ev.src}</strong></td>
         <td>${ev.keyId}</td>
         <td>${ev.algo}</td>
+        <td>${ev.caller}</td>
         <td>${ev.entropy} bits</td>
         <td>${ev.lat}</td>
-        <td>${ev.isAnomaly ? '<span class="pill-badge pill-danger">🚨 BLOCKED</span>' : '<span class="pill-badge pill-success">✓ SAFE</span>'}</td>
+        <td>${ev.isAnomaly ? '<span class="cyber-badge badge-alert-count">🚨 BLOCKED</span>' : '<span style="color:#10b981; font-weight:700;">✓ VALID</span>'}</td>
       `;
       el.telemetryStreamBody.appendChild(row);
     });
@@ -335,26 +332,27 @@
       if (asset.qvs <= 10.0 || asset.status === 'MIGRATED') pqcCount++;
 
       const tr = document.createElement('tr');
-      const qvsColor = asset.qvs >= 80 ? 'text-danger' : (asset.qvs >= 50 ? 'text-warning' : 'text-success');
+      const qvsColor = asset.qvs >= 80 ? 'text-alert' : (asset.qvs >= 50 ? 'text-purple' : 'text-success');
 
       tr.innerHTML = `
         <td><strong>${asset.name}</strong></td>
         <td>${asset.keyId}</td>
-        <td><code>${asset.algo}</code></td>
+        <td><span class="math-badge">${asset.algo}</span></td>
         <td>${asset.shelfLife}</td>
         <td>${asset.criticality}</td>
-        <td><strong class="${qvsColor}">${asset.qvs.toFixed(1)} / 100</strong></td>
-        <td><span class="text-indigo">${asset.targetPqc}</span></td>
+        <td>${asset.exposure}</td>
+        <td><strong class="${qvsColor}">${asset.qvs.toFixed(1)}</strong></td>
+        <td><span class="text-cyan">${asset.targetPqc}</span></td>
         <td>
-          <span class="pill-badge ${asset.status === 'MIGRATED' ? 'pill-success' : 'pill-warning'}">
+          <span class="comp-pill ${asset.status === 'MIGRATED' ? 'pass' : 'warn'}">
             ${asset.status}
           </span>
         </td>
         <td>
           ${
             asset.status === 'MIGRATED'
-              ? '<span class="text-success" style="font-weight:700;">✓ Protected</span>'
-              : `<button class="btn-migrate-action" data-key="${asset.keyId}">Upgrade Key</button>`
+              ? '<span class="text-success" style="font-weight:700;">✓ PQC Ready</span>'
+              : `<button class="btn-cyber-triage btn-migrate-action" data-key="${asset.keyId}">Upgrade to PQC</button>`
           }
         </td>
       `;
@@ -362,9 +360,10 @@
     });
 
     const avgQvs = (totalQvs / state.inventory.length).toFixed(1);
-    if (el.orgAvgQvs) el.orgAvgQvs.textContent = `${avgQvs} / 100`;
+    if (el.orgAvgQvs) el.orgAvgQvs.textContent = avgQvs;
     const pct = ((pqcCount / state.inventory.length) * 100).toFixed(1);
     if (el.pqcProgressPct) el.pqcProgressPct.textContent = `${pct}%`;
+    if (el.topPqcProgress) el.topPqcProgress.textContent = `${pct}%`;
 
     el.inventoryTableBody.querySelectorAll('.btn-migrate-action').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -381,15 +380,11 @@
       item.qvs = 3.5;
       item.status = 'MIGRATED';
       renderInventoryTable();
-      showToast(`Key '${keyId}' upgraded to Quantum-Safe ML-DSA! Danger score dropped to 3.5.`);
+      showToast(`Key '${keyId}' migrated to Post-Quantum ${item.targetPqc}!`);
     }
   }
 
   // --- CANVASES & VISUALIZERS ---
-  function isDarkTheme() {
-    return state.theme !== 'light';
-  }
-
   function drawQuboCanvas() {
     if (!el.quboCanvas) return;
     const ctx = el.quboCanvas.getContext('2d');
@@ -397,12 +392,7 @@
     const h = el.quboCanvas.height;
     ctx.clearRect(0, 0, w, h);
 
-    const isDark = isDarkTheme();
-    const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-    const textColor = isDark ? '#94a3b8' : '#64748b';
-    const curveColor = '#6366f1';
-
-    ctx.strokeStyle = gridColor;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
     ctx.lineWidth = 1;
     for (let y = 25; y < h; y += 30) {
       ctx.beginPath();
@@ -411,7 +401,7 @@
       ctx.stroke();
     }
 
-    ctx.strokeStyle = curveColor;
+    ctx.strokeStyle = '#a855f7';
     ctx.lineWidth = 2.5;
     ctx.beginPath();
     const trace = state.quboEnergyTrace;
@@ -430,20 +420,19 @@
     trace.forEach((val, i) => {
       const x = 35 + i * xStep;
       const y = 25 + ((val - maxVal) / (minVal - maxVal)) * (h - 50);
-      ctx.fillStyle = i === trace.length - 1 ? '#10b981' : '#6366f1';
+      ctx.fillStyle = i === trace.length - 1 ? '#00f0ff' : '#a855f7';
       ctx.beginPath();
       ctx.arc(x, y, i === trace.length - 1 ? 5 : 3, 0, Math.PI * 2);
       ctx.fill();
     });
 
-    ctx.fillStyle = textColor;
-    ctx.font = '10px Inter, sans-serif';
-    ctx.fillText('Energy Cooling Curve (T → 0)', 35, 16);
-    ctx.fillText(`Lowest Energy = ${trace[trace.length - 1]}`, w / 2 - 110, h - 8);
+    ctx.fillStyle = '#8b9bb4';
+    ctx.font = '10px JetBrains Mono';
+    ctx.fillText('Simulated Annealing E(t)', 35, 16);
+    ctx.fillText(`E_min = ${trace[trace.length - 1]}`, w / 2 - 100, h - 8);
 
-    // Qubit Spins
     const startX = w / 2 + 25;
-    ctx.fillText('Qubit Outlier States (0 = Safe, 1 = Attacker)', startX, 16);
+    ctx.fillText('Qubit Spin State Vector x ∈ {0, 1}^N', startX, 16);
 
     const cols = 5;
     const cellSize = 22;
@@ -455,15 +444,15 @@
       const cx = startX + c * (cellSize + gap);
       const cy = 30 + r * (cellSize + gap);
 
-      ctx.fillStyle = spin === 1 ? 'rgba(244, 63, 94, 0.85)' : (isDark ? 'rgba(99, 102, 241, 0.2)' : 'rgba(99, 102, 241, 0.1)');
-      ctx.strokeStyle = spin === 1 ? '#f43f5e' : '#6366f1';
+      ctx.fillStyle = spin === 1 ? 'rgba(239, 68, 68, 0.85)' : 'rgba(0, 240, 255, 0.2)';
+      ctx.strokeStyle = spin === 1 ? '#ef4444' : '#00f0ff';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.rect(cx, cy, cellSize, cellSize);
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = spin === 1 ? '#fff' : (isDark ? '#cbd5e1' : '#334155');
+      ctx.fillStyle = spin === 1 ? '#fff' : '#8b9bb4';
       ctx.font = '11px JetBrains Mono';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -481,14 +470,12 @@
     const h = el.mpsCanvas.height;
     ctx.clearRect(0, 0, w, h);
 
-    const isDark = isDarkTheme();
-    const textColor = isDark ? '#94a3b8' : '#64748b';
     const numNodes = 8;
     const nodeRadius = 13;
     const stepX = (w - 70) / (numNodes - 1);
     const cy = h / 2 + 8;
 
-    ctx.strokeStyle = '#6366f1';
+    ctx.strokeStyle = '#00f0ff';
     ctx.lineWidth = 2.5;
     ctx.beginPath();
     ctx.moveTo(35, cy);
@@ -497,12 +484,12 @@
 
     state.mpsBondEntropies.forEach((entropy, i) => {
       const xMid = 35 + i * stepX + stepX / 2;
-      ctx.fillStyle = entropy > 1.2 ? '#f43f5e' : '#6366f1';
+      ctx.fillStyle = entropy > 1.2 ? '#ef4444' : '#a855f7';
       ctx.font = '9px JetBrains Mono';
       ctx.textAlign = 'center';
-      ctx.fillText(`S=${entropy}`, xMid, cy - 18);
+      ctx.fillText(`χ=4 (S=${entropy})`, xMid, cy - 18);
 
-      ctx.fillStyle = '#6366f1';
+      ctx.fillStyle = '#00f0ff';
       ctx.beginPath();
       ctx.arc(xMid, cy, 3, 0, Math.PI * 2);
       ctx.fill();
@@ -511,38 +498,38 @@
     for (let i = 0; i < numNodes; i++) {
       const cx = 35 + i * stepX;
 
-      ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.2)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(cx, cy + nodeRadius);
       ctx.lineTo(cx, cy + 30);
       ctx.stroke();
 
-      ctx.fillStyle = textColor;
-      ctx.font = '8.5px JetBrains Mono';
+      ctx.fillStyle = '#8b9bb4';
+      ctx.font = '8px JetBrains Mono';
       ctx.textAlign = 'center';
-      ctx.fillText(`Clue ${i+1}`, cx, cy + 42);
+      ctx.fillText(`|φ(${i+1})⟩`, cx, cy + 42);
 
-      ctx.fillStyle = isDark ? '#131b2e' : '#ffffff';
-      ctx.strokeStyle = i === 0 || i === 7 ? '#6366f1' : '#06b6d4';
+      ctx.fillStyle = '#0a0e1a';
+      ctx.strokeStyle = i === 0 || i === 7 ? '#a855f7' : '#00f0ff';
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(cx, cy, nodeRadius, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = isDark ? '#fff' : '#0f172a';
+      ctx.fillStyle = '#fff';
       ctx.font = '9.5px JetBrains Mono';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(`A${i+1}`, cx, cy);
+      ctx.fillText(`A^(${i+1})`, cx, cy);
     }
 
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = textColor;
-    ctx.font = '10px Inter, sans-serif';
-    ctx.fillText('Tensor Network Entangled Clues Chain', 30, 16);
+    ctx.fillStyle = '#8b9bb4';
+    ctx.font = '10px JetBrains Mono';
+    ctx.fillText('MPS Tensor Train Contraction ⟨W | Ψ(v)⟩', 30, 16);
   }
 
   function drawGroverCanvas() {
@@ -552,39 +539,37 @@
     const h = el.groverCanvas.height;
     ctx.clearRect(0, 0, w, h);
 
-    const isDark = isDarkTheme();
-    const textColor = isDark ? '#94a3b8' : '#64748b';
     const history = state.groverData.history;
-    const barWidth = 46;
-    const gap = 40;
+    const barWidth = 48;
+    const gap = 42;
     const startX = 60;
     const chartHeight = h - 60;
 
-    ctx.fillStyle = textColor;
-    ctx.font = '11px Inter, sans-serif';
-    ctx.fillText('Target Probability Amplification: Making the Hacker Stand Out', startX, 18);
+    ctx.fillStyle = '#8b9bb4';
+    ctx.font = '11px JetBrains Mono';
+    ctx.fillText('Target State Probability Amplification P(target) = |⟨target | Ψ(k)⟩|²', startX, 18);
 
     history.forEach((step, i) => {
       const x = startX + i * (barWidth + gap);
       const barH = step.p * chartHeight;
       const y = h - 28 - barH;
 
-      ctx.fillStyle = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
       ctx.fillRect(x, h - 28 - chartHeight, barWidth, chartHeight);
 
       const grad = ctx.createLinearGradient(0, y, 0, h - 28);
       grad.addColorStop(0, '#10b981');
-      grad.addColorStop(1, '#6366f1');
+      grad.addColorStop(1, '#00f0ff');
       ctx.fillStyle = grad;
       ctx.fillRect(x, y, barWidth, barH);
 
-      ctx.fillStyle = isDark ? '#f8fafc' : '#0f172a';
+      ctx.fillStyle = '#fff';
       ctx.font = '10px JetBrains Mono';
       ctx.textAlign = 'center';
       ctx.fillText(`${(step.p * 100).toFixed(1)}%`, x + barWidth / 2, y - 5);
 
-      ctx.fillStyle = textColor;
-      ctx.fillText(`Step ${step.k}`, x + barWidth / 2, h - 12);
+      ctx.fillStyle = '#8b9bb4';
+      ctx.fillText(`k=${step.k}`, x + barWidth / 2, h - 12);
     });
 
     ctx.textAlign = 'left';
@@ -632,11 +617,11 @@
     state.streamingActive = !state.streamingActive;
     if (state.streamingActive) {
       el.streamStateIcon.textContent = '⏸️';
-      el.streamStateText.textContent = 'Pause Feed';
+      el.streamStateText.textContent = 'Pause Telemetry';
       startStreamInterval();
     } else {
       el.streamStateIcon.textContent = '▶️';
-      el.streamStateText.textContent = 'Resume Feed';
+      el.streamStateText.textContent = 'Resume Telemetry';
       clearInterval(state.streamTimer);
     }
   }
@@ -660,7 +645,7 @@
         if (res.ok) {
           const json = await res.json();
           syncWithBackend();
-          showToast(`⚡ Test ${scenarioNum} Launched: ${json.description}`);
+          showToast(`⚡ Backend Processed Scenario ${scenarioNum}: ${json.description}`);
           return;
         }
       } catch (err) {
@@ -690,7 +675,7 @@
       });
       state.groverData.history[5].p = 0.999;
       renderAllCanvases();
-      showToast('🚨 Test 1: Reused Nonce caught by Grover Search!');
+      showToast('🚨 Scenario 1: Nonce Collision caught via Grover Search!');
     } else if (scenarioNum === 2) {
       pushNewStreamEvent(true, { time: now, src: 'Blockchain', keyId: 'key-eth-smart-contract', algo: 'ECDSA-secp256k1', caller: 'unauthenticated-relayer (TOR-EXIT)', entropy: '7.85', lat: '14.2ms', isAnomaly: true });
       state.activeAlerts.unshift({
@@ -707,7 +692,7 @@
         soarExecuted: false,
         attributions: { 'malleability_indicator': 1.0, 'geo_risk_score': 0.70 }
       });
-      showToast('🚨 Test 2: Tampered signature detected via QUBO!');
+      showToast('🚨 Scenario 2: Signature Malleability caught via QUBO!');
     } else if (scenarioNum === 3) {
       pushNewStreamEvent(true, { time: now, src: 'CI/CD', keyId: 'key-cicd-master-release', algo: 'RSA-4096', caller: 'unauthorized_runner_vm_9823 (198.51.100.42)', entropy: '7.91', lat: '88.2ms', isAnomaly: true });
       state.activeAlerts.unshift({
@@ -726,7 +711,7 @@
       });
       state.mpsBondEntropies = [0.92, 1.45, 1.88, 2.14, 1.76, 1.10, 0.65];
       renderAllCanvases();
-      showToast('🚨 Test 3: Rogue server signing flagged via Tensor Network!');
+      showToast('🚨 Scenario 3: Rogue CI/CD signing caught via Tensor Network!');
     } else if (scenarioNum === 4) {
       pushNewStreamEvent(true, { time: now, src: 'PKI/HSM', keyId: 'key-root-ca-01', algo: 'RSA-4096', caller: 'suspicious-recon-service (ANON-VPN)', entropy: '7.94', lat: '1.2ms', isAnomaly: true });
       state.activeAlerts.unshift({
@@ -743,7 +728,7 @@
         soarExecuted: false,
         attributions: { 'key_frequency_burst': 0.95, 'geo_risk_score': 0.85 }
       });
-      showToast('🚨 Test 4: Bulk key hoarding flagged!');
+      showToast('🚨 Scenario 4: Bulk Key Hoarding flagged!');
     }
     renderAlerts();
   }
@@ -758,7 +743,17 @@
     state.recentEvents = [];
     renderAlerts();
     renderStreamTable();
-    showToast('Alarm list and feed cleared.');
+    showToast('Alerts and stream log cleared.');
+  });
+
+  el.btnQuarantineAll.addEventListener('click', () => {
+    state.activeAlerts.forEach(a => a.soarExecuted = true);
+    state.inventory.forEach(i => {
+      if (i.status !== 'MIGRATED') i.status = 'QUARANTINED';
+    });
+    renderAlerts();
+    renderInventoryTable();
+    showToast('🛡️ All active keys locked down & quarantined via SOAR!');
   });
 
   el.btnToggleStream.addEventListener('click', toggleStreaming);
@@ -770,7 +765,7 @@
     activeModalAlert = alert;
 
     el.modalSeverityBadge.textContent = alert.severity;
-    el.modalSeverityBadge.className = `pill-badge ${alert.severity === 'CRITICAL' ? 'pill-danger' : 'pill-warning'}`;
+    el.modalSeverityBadge.className = `cyber-badge ${alert.severity === 'CRITICAL' ? 'badge-alert-count' : 'badge-alert-count'}`;
     el.modalAlertTitle.textContent = alert.title;
     el.modalKeyId.textContent = alert.keyId;
     el.modalEngine.textContent = alert.engine;
@@ -813,7 +808,7 @@
           body: JSON.stringify({ alert_id: alertId, action: alert.playbook })
         });
       } catch (e) {
-        console.warn('Backend SOAR call failed:', e);
+        console.warn('Backend SOAR error:', e);
       }
     }
 
@@ -824,7 +819,7 @@
       renderInventoryTable();
     }
     renderAlerts();
-    showToast(`⚡ Key '${alert.keyId}' locked down and quarantined.`);
+    showToast(`⚡ Key '${alert.keyId}' quarantined.`);
   }
 
   el.btnExecuteSoar.addEventListener('click', () => {
@@ -838,18 +833,25 @@
     if (activeModalAlert) {
       const cef = `CEF:0|Quantum-Inspired|QI-CTD|1.0|${activeModalAlert.mitre}|${activeModalAlert.title}|${activeModalAlert.severity}|src=10.0.1.50 dstKey=${activeModalAlert.keyId} cs1=${activeModalAlert.engine} cs1Label=DetectionEngine`;
       navigator.clipboard.writeText(cef);
-      showToast('✓ Copied security log format to clipboard!');
+      showToast('✓ CEF log entry copied to clipboard!');
     }
   });
+
+  if (el.btnExportAllAudit) {
+    el.btnExportAllAudit.addEventListener('click', () => {
+      showToast('✓ Exported 3 CEF / Syslog Audit Records!');
+    });
+  }
 
   // --- CRYPTO SCANNER LOGIC (TAB 4) ---
   if (el.btnSampleRSA) {
     el.btnSampleRSA.addEventListener('click', () => {
       el.scannerInputText.value = `-----BEGIN CERTIFICATE-----
+MIIEpAIBAAKCAQEA3f29... (Corporate Root CA) ...
 Issuer: C=US, O=Enterprise CA, CN=Corp Root CA 2024
 Subject: CN=internal-pki.corp.com
 Public Key Algorithm: rsaEncryption (2048-bit)
-Validity: 15 Years Shelf-Life
+Validity: 2024-01-01 to 2039-01-01 (15 Years Shelf-Life)
 -----END CERTIFICATE-----`;
       runCryptoInspection();
     });
@@ -867,8 +869,8 @@ Data Lifetime: 20 Years
     el.btnSamplePQC.addEventListener('click', () => {
       el.scannerInputText.value = `-----BEGIN NIST PQC PUBLIC KEY-----
 Algorithm: ML-DSA-65 (NIST FIPS 204 - Dilithium3)
-Security Category: Category 3 (Shor-Resistant)
-Status: Certified Quantum-Safe
+Security Category: Category 3 (AES-192 equivalent)
+Quantum Resistance: Certified Shor-Resistant
 -----END NIST PQC PUBLIC KEY-----`;
       runCryptoInspection();
     });
@@ -884,64 +886,73 @@ Status: Certified Quantum-Safe
       const fakeSig = `-----BEGIN NIST FIPS 204 QUANTUM-SAFE SIGNATURE-----
 Algorithm: ML-DSA-65 (Dilithium3)
 Hash: SHA3-512 (${Math.random().toString(36).substring(2, 15)})
+Signature_Block:
+  4a8f9c1b7e3d20684f5a11c08e3321557ba8d34091c5e9a4f216789bde014432
+  9c3e12084b7e20684f5a11c08e3321557ba8d34091c5e9a4f216789bde0198af
 Status: VERIFIED_QUANTUM_SAFE
 Timestamp: ${new Date().toISOString()}
 -----END NIST FIPS 204 QUANTUM-SAFE SIGNATURE-----`;
 
       el.pqcSealText.value = fakeSig;
       el.pqcSealOutput.style.display = 'block';
-      showToast('✓ Generated NIST ML-DSA-65 Quantum-Safe Seal!');
+      showToast('✓ Generated NIST ML-DSA-65 Quantum-Safe Cryptographic Seal!');
     });
   }
 
   function runCryptoInspection() {
     const text = el.scannerInputText.value.toLowerCase();
     if (!text) {
-      showToast('Please paste text or click a sample preset.');
+      showToast('Please paste a certificate or select a preset sample.');
       return;
     }
 
     if (text.includes('ml-dsa') || text.includes('dilithium') || text.includes('pqc')) {
       el.scanAlgoLabel.textContent = 'ML-DSA-65';
-      el.scanAlgoLabel.className = 'scan-stat-val text-success';
+      el.scanAlgoLabel.className = 'verdict-val text-success';
       el.scanKeyLengthLabel.textContent = 'NIST FIPS 204 Lattice Key';
       el.scanQvsLabel.textContent = '3.2 / 100';
-      el.scanQvsLabel.className = 'scan-stat-val text-success';
+      el.scanQvsLabel.className = 'verdict-val text-success';
       el.scanUrgencyLabel.textContent = 'QUANTUM SAFE';
-      el.scanUrgencyLabel.className = 'scan-stat-sub text-success';
+      el.scanUrgencyLabel.className = 'verdict-sub text-success';
       el.scanTimeToCrack.textContent = '> 1000 Years';
-      el.scanTimeToCrack.className = 'scan-stat-val text-success';
-      el.scanRecText.textContent = '✓ This key is already using Post-Quantum Cryptography (NIST FIPS 204). It is immune to quantum supercomputers.';
-      el.scanStatusBadge.textContent = 'SAFE (PQC)';
-      el.scanStatusBadge.className = 'pill-badge pill-success';
+      el.scanTimeToCrack.className = 'verdict-val text-success';
+      el.scanRecText.textContent = '✓ This asset is already using certified Post-Quantum Cryptography (NIST FIPS 204). It is fully immune to Shor\'s algorithm.';
+      el.scanStatusBadge.textContent = 'PROTECTED (PQC)';
+      el.scanStatusBadge.style.background = 'rgba(16, 185, 129, 0.2)';
+      el.scanStatusBadge.style.color = '#10b981';
+      el.scanStatusBadge.style.borderColor = '#10b981';
     } else if (text.includes('ecdsa') || text.includes('secp256k1') || text.includes('p-256')) {
       el.scanAlgoLabel.textContent = 'ECDSA-256';
-      el.scanAlgoLabel.className = 'scan-stat-val text-danger';
+      el.scanAlgoLabel.className = 'verdict-val text-alert';
       el.scanKeyLengthLabel.textContent = '256-bit Elliptic Curve';
       el.scanQvsLabel.textContent = '94.8 / 100';
-      el.scanQvsLabel.className = 'scan-stat-val text-danger';
+      el.scanQvsLabel.className = 'verdict-val text-alert';
       el.scanUrgencyLabel.textContent = 'CRITICAL VULNERABILITY';
-      el.scanUrgencyLabel.className = 'scan-stat-sub text-danger';
+      el.scanUrgencyLabel.className = 'verdict-sub text-alert';
       el.scanTimeToCrack.textContent = '< 5 Seconds';
-      el.scanTimeToCrack.className = 'scan-stat-val text-danger';
-      el.scanRecText.textContent = '⚠️ CRITICAL: Vulnerable to Shor\'s algorithm and nonce reuse. Upgrade to ML-DSA-65 recommended.';
+      el.scanTimeToCrack.className = 'verdict-val text-alert';
+      el.scanRecText.textContent = '⚠️ CRITICAL: Discrete log curve vulnerable to Shor\'s algorithm and nonce reuse. Immediate upgrade to ML-DSA-65 recommended.';
       el.scanStatusBadge.textContent = 'CRITICAL RISK';
-      el.scanStatusBadge.className = 'pill-badge pill-danger';
+      el.scanStatusBadge.style.background = 'rgba(239, 68, 68, 0.2)';
+      el.scanStatusBadge.style.color = '#ef4444';
+      el.scanStatusBadge.style.borderColor = '#ef4444';
     } else {
       el.scanAlgoLabel.textContent = 'RSA-2048';
-      el.scanAlgoLabel.className = 'scan-stat-val text-indigo';
-      el.scanKeyLengthLabel.textContent = '2048-bit Modulus';
+      el.scanAlgoLabel.className = 'verdict-val text-purple';
+      el.scanKeyLengthLabel.textContent = '2048-bit Integer Factoring';
       el.scanQvsLabel.textContent = '84.5 / 100';
-      el.scanQvsLabel.className = 'scan-stat-val text-danger';
+      el.scanQvsLabel.className = 'verdict-val text-alert';
       el.scanUrgencyLabel.textContent = 'HIGH MIGRATION PRIORITY';
-      el.scanUrgencyLabel.className = 'scan-stat-sub text-danger';
+      el.scanUrgencyLabel.className = 'verdict-sub text-alert';
       el.scanTimeToCrack.textContent = '< 10 Seconds';
-      el.scanTimeToCrack.className = 'scan-stat-val text-danger';
-      el.scanRecText.textContent = '⚠️ VULNERABLE: Integer factoring easily broken by quantum computers. Upgrade to NIST ML-DSA-87 recommended.';
+      el.scanTimeToCrack.className = 'verdict-val text-purple';
+      el.scanRecText.textContent = '⚠️ VULNERABLE: Integer factorization broken by Shor\'s algorithm on CRQC. Upgrade to NIST ML-DSA-87 recommended.';
       el.scanStatusBadge.textContent = 'HIGH RISK';
-      el.scanStatusBadge.className = 'pill-badge pill-warning';
+      el.scanStatusBadge.style.background = 'rgba(245, 158, 11, 0.2)';
+      el.scanStatusBadge.style.color = '#f59e0b';
+      el.scanStatusBadge.style.borderColor = '#f59e0b';
     }
-    showToast('✓ Security inspection complete.');
+    showToast('✓ Cryptographic inspection complete.');
   }
 
   function showToast(msg) {
@@ -949,14 +960,14 @@ Timestamp: ${new Date().toISOString()}
     toast.style.position = 'fixed';
     toast.style.bottom = '24px';
     toast.style.right = '24px';
-    toast.style.background = isDarkTheme() ? '#131b2e' : '#ffffff';
-    toast.style.color = isDarkTheme() ? '#f8fafc' : '#0f172a';
-    toast.style.border = '1px solid #6366f1';
-    toast.style.boxShadow = '0 8px 24px rgba(0,0,0,0.2)';
+    toast.style.background = 'rgba(10, 14, 26, 0.95)';
+    toast.style.color = '#00f0ff';
+    toast.style.border = '1px solid #00f0ff';
+    toast.style.boxShadow = '0 0 16px rgba(0, 240, 255, 0.35)';
     toast.style.padding = '12px 18px';
     toast.style.borderRadius = '8px';
-    toast.style.fontFamily = 'Inter, sans-serif';
-    toast.style.fontSize = '12.5px';
+    toast.style.fontFamily = 'JetBrains Mono, monospace';
+    toast.style.fontSize = '12px';
     toast.style.fontWeight = '600';
     toast.style.zIndex = '9999';
     toast.textContent = msg;
@@ -966,7 +977,6 @@ Timestamp: ${new Date().toISOString()}
   }
 
   // --- INITIALIZATION ---
-  applyTheme(state.theme);
   renderAlerts();
   renderStreamTable();
   renderInventoryTable();
