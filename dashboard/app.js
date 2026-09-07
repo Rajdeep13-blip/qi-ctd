@@ -198,7 +198,25 @@
     scanRecText: document.getElementById('scanRecText'),
     btnGeneratePqcSeal: document.getElementById('btnGeneratePqcSeal'),
     pqcSealOutput: document.getElementById('pqcSealOutput'),
-    pqcSealText: document.getElementById('pqcSealText')
+    pqcSealText: document.getElementById('pqcSealText'),
+    // Guide Modal & Quick Start Elements
+    btnOpenHowItWorks: document.getElementById('btnOpenHowItWorks'),
+    btnCloseHowItWorks: document.getElementById('btnCloseHowItWorks'),
+    howItWorksModal: document.getElementById('howItWorksModal'),
+    guideTabBtns: document.querySelectorAll('.guide-tab-btn'),
+    guideStepPanels: document.querySelectorAll('.guide-step-panel'),
+    btnPrevGuideStep: document.getElementById('btnPrevGuideStep'),
+    btnNextGuideStep: document.getElementById('btnNextGuideStep'),
+    guideStepIndicator: document.getElementById('guideStepIndicator'),
+    btnGuideStartDemo: document.getElementById('btnGuideStartDemo'),
+    btnLaunchGuidedDemo: document.getElementById('btnLaunchGuidedDemo'),
+    btnTriggerSampleDemo: document.getElementById('btnTriggerSampleDemo'),
+    quickStartBanner: document.getElementById('quickStartBanner'),
+    btnCloseQsBanner: document.getElementById('btnCloseQsBanner'),
+    pipeStep1: document.getElementById('pipeStep1'),
+    pipeStep2: document.getElementById('pipeStep2'),
+    pipeStep3: document.getElementById('pipeStep3'),
+    pipeStep4: document.getElementById('pipeStep4')
   };
 
   let activeModalAlert = null;
@@ -1236,6 +1254,127 @@ Timestamp: ${new Date().toISOString()}
 
     document.body.appendChild(toast);
     setTimeout(() => { toast.remove(); }, 3200);
+  }
+
+  // --- GUIDE MODAL LOGIC ---
+  let currentGuideStep = 1;
+  const totalGuideSteps = 4;
+
+  function updateGuideStep(step) {
+    currentGuideStep = Math.max(1, Math.min(totalGuideSteps, step));
+    el.guideTabBtns.forEach(btn => {
+      const s = parseInt(btn.getAttribute('data-step'), 10);
+      btn.classList.toggle('active', s === currentGuideStep);
+    });
+    el.guideStepPanels.forEach(panel => {
+      panel.classList.toggle('active', panel.id === `guideStep${currentGuideStep}`);
+    });
+    if (el.guideStepIndicator) {
+      el.guideStepIndicator.textContent = `Step ${currentGuideStep} of ${totalGuideSteps}`;
+    }
+    if (el.btnPrevGuideStep) el.btnPrevGuideStep.disabled = currentGuideStep === 1;
+    if (el.btnNextGuideStep) {
+      if (currentGuideStep === totalGuideSteps) {
+        el.btnNextGuideStep.textContent = 'Done ✓';
+      } else {
+        el.btnNextGuideStep.textContent = 'Next ▶';
+      }
+    }
+  }
+
+  if (el.btnOpenHowItWorks) {
+    el.btnOpenHowItWorks.addEventListener('click', () => {
+      if (el.howItWorksModal) el.howItWorksModal.style.display = 'flex';
+      updateGuideStep(1);
+    });
+  }
+
+  if (el.btnCloseHowItWorks) {
+    el.btnCloseHowItWorks.addEventListener('click', () => {
+      if (el.howItWorksModal) el.howItWorksModal.style.display = 'none';
+    });
+  }
+
+  el.guideTabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const step = parseInt(btn.getAttribute('data-step'), 10);
+      updateGuideStep(step);
+    });
+  });
+
+  if (el.btnPrevGuideStep) {
+    el.btnPrevGuideStep.addEventListener('click', () => updateGuideStep(currentGuideStep - 1));
+  }
+
+  if (el.btnNextGuideStep) {
+    el.btnNextGuideStep.addEventListener('click', () => {
+      if (currentGuideStep === totalGuideSteps) {
+        if (el.howItWorksModal) el.howItWorksModal.style.display = 'none';
+      } else {
+        updateGuideStep(currentGuideStep + 1);
+      }
+    });
+  }
+
+  if (el.btnGuideStartDemo) {
+    el.btnGuideStartDemo.addEventListener('click', () => {
+      if (el.howItWorksModal) el.howItWorksModal.style.display = 'none';
+      launchInteractiveGuidedDemo();
+    });
+  }
+
+  if (el.btnCloseQsBanner && el.quickStartBanner) {
+    el.btnCloseQsBanner.addEventListener('click', () => {
+      el.quickStartBanner.style.display = 'none';
+    });
+  }
+
+  // --- INTERACTIVE GUIDED DEMO ---
+  function launchInteractiveGuidedDemo() {
+    // 1. Switch to SOC View
+    const socBtn = document.querySelector('[data-tab="soc-view"]');
+    if (socBtn) socBtn.click();
+
+    // 2. Light up pipeline steps 1 & 2
+    if (el.pipeStep1) el.pipeStep1.classList.add('active');
+    if (el.pipeStep2) el.pipeStep2.classList.add('active');
+    if (el.pipeStep3) el.pipeStep3.classList.remove('active');
+    if (el.pipeStep4) el.pipeStep4.classList.remove('active');
+
+    showToast('🚀 Step 1/3: Simulating Live Attack (ECDSA Nonce Reuse)...');
+
+    // 3. Trigger Attack 1 after 500ms
+    setTimeout(() => {
+      triggerAttackScenario(1);
+      if (el.pipeStep3) el.pipeStep3.classList.add('active');
+      showToast('⚡ Step 2/3: Quantum AI flagged anomaly in 3.8ms! Opening Explainability...');
+
+      // Highlight the first alert
+      setTimeout(() => {
+        const firstAlert = el.alertsContainer.querySelector('.alert-item-box');
+        if (firstAlert) {
+          firstAlert.classList.add('demo-highlight-ring');
+          firstAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Open modal after 1.2s
+        setTimeout(() => {
+          if (state.activeAlerts.length > 0) {
+            openModal(state.activeAlerts[0].id);
+            if (el.btnExecuteSoar) el.btnExecuteSoar.classList.add('demo-highlight-ring');
+            showToast('🛡️ Step 3/3: Click "Execute 1-Click Lockdown" to deploy Post-Quantum seal!');
+          }
+        }, 1200);
+      }, 500);
+    }, 600);
+  }
+
+  if (el.btnLaunchGuidedDemo) {
+    el.btnLaunchGuidedDemo.addEventListener('click', launchInteractiveGuidedDemo);
+  }
+
+  if (el.btnTriggerSampleDemo) {
+    el.btnTriggerSampleDemo.addEventListener('click', launchInteractiveGuidedDemo);
   }
 
   // --- INITIALIZATION ---
