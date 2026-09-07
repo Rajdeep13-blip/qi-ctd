@@ -1,5 +1,5 @@
 /**
- * QI-CTD Cyberpunk Dark Dashboard with Left Sidebar Layout
+ * QI-CTD Cyberpunk Dark Dashboard with Interactive Quantum AI Engines
  * Real-Time Quantum-Inspired Threat Detection & Automated SOAR Orchestration
  */
 
@@ -25,19 +25,26 @@
     totalAnomalies: 3,
     activeAlerts: [],
     recentEvents: [],
+    // QUBO State
+    quboTemp: 0.05,
+    quboIsAnnealing: false,
     quboEnergyTrace: [-2.1, -4.5, -7.2, -9.8, -12.4, -15.1, -17.3, -18.42],
     quboSpins: [0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    // MPS State
     mpsBondEntropies: [0.42, 0.85, 1.42, 1.84, 1.12, 0.76, 0.35],
+    mpsActiveNode: -1,
+    // Grover State
+    groverCurrentIndex: 5,
     groverData: {
       N: 1024,
       M: 2,
       optimalK: 18,
       history: [
-        { k: 1, p: 0.08 },
-        { k: 4, p: 0.28 },
-        { k: 8, p: 0.58 },
-        { k: 12, p: 0.84 },
-        { k: 16, p: 0.96 },
+        { k: 1, p: 0.088 },
+        { k: 4, p: 0.284 },
+        { k: 8, p: 0.580 },
+        { k: 12, p: 0.840 },
+        { k: 16, p: 0.960 },
         { k: 18, p: 0.998 }
       ]
     },
@@ -123,7 +130,7 @@
     orgAvgQvs: document.getElementById('orgAvgQvs'),
     pqcProgressPct: document.getElementById('pqcProgressPct'),
     topPqcProgress: document.getElementById('topPqcProgress'),
-    // Sidebar Control Buttons
+    // Sidebar Controls
     btnToggleStream: document.getElementById('btnToggleStream'),
     streamStateIcon: document.getElementById('streamStateIcon'),
     streamStateText: document.getElementById('streamStateText'),
@@ -148,6 +155,16 @@
     btnExecuteSoar: document.getElementById('btnExecuteSoar'),
     btnExportCef: document.getElementById('btnExportCef'),
     btnExportAllAudit: document.getElementById('btnExportAllAudit'),
+    // Interactive Algorithm Controls
+    btnRunQuboLive: document.getElementById('btnRunQuboLive'),
+    btnFlipQuboSpins: document.getElementById('btnFlipQuboSpins'),
+    quboTempDisplay: document.getElementById('quboTempDisplay'),
+    btnRunMpsLive: document.getElementById('btnRunMpsLive'),
+    btnPerturbMps: document.getElementById('btnPerturbMps'),
+    mpsEntropyDisplay: document.getElementById('mpsEntropyDisplay'),
+    btnRunGroverLive: document.getElementById('btnRunGroverLive'),
+    btnResetGrover: document.getElementById('btnResetGrover'),
+    groverIterDisplay: document.getElementById('groverIterDisplay'),
     // Canvases
     quboCanvas: document.getElementById('quboCanvas'),
     mpsCanvas: document.getElementById('mpsCanvas'),
@@ -251,7 +268,7 @@
       }
 
       if (targetId === 'quantum-algorithms') {
-        renderAllCanvases();
+        setTimeout(renderAllCanvases, 50);
       }
     });
   });
@@ -384,7 +401,9 @@
     }
   }
 
-  // --- CANVASES & VISUALIZERS ---
+  // --- INTERACTIVE CANVASES & VISUALIZERS ---
+
+  // 1. QUBO SOLVER CANVAS
   function drawQuboCanvas() {
     if (!el.quboCanvas) return;
     const ctx = el.quboCanvas.getContext('2d');
@@ -392,77 +411,139 @@
     const h = el.quboCanvas.height;
     ctx.clearRect(0, 0, w, h);
 
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+    // Background Grid
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
     ctx.lineWidth = 1;
-    for (let y = 25; y < h; y += 30) {
+    for (let y = 30; y < h - 20; y += 30) {
       ctx.beginPath();
-      ctx.moveTo(30, y);
+      ctx.moveTo(35, y);
       ctx.lineTo(w / 2 - 20, y);
       ctx.stroke();
     }
 
+    // Energy Curve
     ctx.strokeStyle = '#a855f7';
     ctx.lineWidth = 2.5;
     ctx.beginPath();
     const trace = state.quboEnergyTrace;
-    const xStep = (w / 2 - 60) / (trace.length - 1);
+    const xStep = (w / 2 - 70) / Math.max(1, trace.length - 1);
     const minVal = -20;
     const maxVal = 0;
 
     trace.forEach((val, i) => {
       const x = 35 + i * xStep;
-      const y = 25 + ((val - maxVal) / (minVal - maxVal)) * (h - 50);
+      const y = 30 + ((val - maxVal) / (minVal - maxVal)) * (h - 65);
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     });
     ctx.stroke();
 
+    // Glowing Curve Points
     trace.forEach((val, i) => {
       const x = 35 + i * xStep;
-      const y = 25 + ((val - maxVal) / (minVal - maxVal)) * (h - 50);
+      const y = 30 + ((val - maxVal) / (minVal - maxVal)) * (h - 65);
       ctx.fillStyle = i === trace.length - 1 ? '#00f0ff' : '#a855f7';
+      ctx.shadowColor = i === trace.length - 1 ? '#00f0ff' : '#a855f7';
+      ctx.shadowBlur = i === trace.length - 1 ? 10 : 4;
       ctx.beginPath();
-      ctx.arc(x, y, i === trace.length - 1 ? 5 : 3, 0, Math.PI * 2);
+      ctx.arc(x, y, i === trace.length - 1 ? 5 : 3.5, 0, Math.PI * 2);
       ctx.fill();
     });
+    ctx.shadowBlur = 0;
 
     ctx.fillStyle = '#8b9bb4';
     ctx.font = '10px JetBrains Mono';
-    ctx.fillText('Simulated Annealing E(t)', 35, 16);
-    ctx.fillText(`E_min = ${trace[trace.length - 1]}`, w / 2 - 100, h - 8);
+    ctx.fillText('Energy Landscape E(t)', 35, 18);
+    const minE = trace[trace.length - 1];
+    ctx.fillText(`E_min = ${minE.toFixed(2)}`, w / 2 - 110, h - 8);
 
-    const startX = w / 2 + 25;
-    ctx.fillText('Qubit Spin State Vector x ∈ {0, 1}^N', startX, 16);
+    // Qubit Spin State Grid
+    const startX = w / 2 + 20;
+    ctx.fillText('Qubit Spin State Matrix x ∈ {0, 1}^N', startX, 18);
 
     const cols = 5;
-    const cellSize = 22;
-    const gap = 7;
+    const cellSize = 24;
+    const gap = 8;
 
     state.quboSpins.forEach((spin, idx) => {
       const r = Math.floor(idx / cols);
       const c = idx % cols;
       const cx = startX + c * (cellSize + gap);
-      const cy = 30 + r * (cellSize + gap);
+      const cy = 34 + r * (cellSize + gap);
 
-      ctx.fillStyle = spin === 1 ? 'rgba(239, 68, 68, 0.85)' : 'rgba(0, 240, 255, 0.2)';
+      ctx.fillStyle = spin === 1 ? 'rgba(239, 68, 68, 0.85)' : 'rgba(0, 240, 255, 0.18)';
       ctx.strokeStyle = spin === 1 ? '#ef4444' : '#00f0ff';
+      ctx.shadowColor = spin === 1 ? '#ef4444' : '#00f0ff';
+      ctx.shadowBlur = spin === 1 ? 8 : 3;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.rect(cx, cy, cellSize, cellSize);
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = spin === 1 ? '#fff' : '#8b9bb4';
+      ctx.fillStyle = spin === 1 ? '#fff' : '#00f0ff';
       ctx.font = '11px JetBrains Mono';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(spin.toString(), cx + cellSize / 2, cy + cellSize / 2);
     });
 
+    ctx.shadowBlur = 0;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
   }
 
+  // Simulated Annealing Live Interactive Loop
+  function runQuboLiveSimulation() {
+    if (state.quboIsAnnealing) return;
+    state.quboIsAnnealing = true;
+    showToast('⚛️ Starting Simulated Annealing Solver...');
+
+    let step = 0;
+    const maxSteps = 15;
+    let temp = 10.0;
+    state.quboEnergyTrace = [-0.5];
+
+    const annealInterval = setInterval(() => {
+      step++;
+      temp *= 0.72;
+      state.quboTemp = temp;
+      if (el.quboTempDisplay) el.quboTempDisplay.textContent = `T = ${temp.toFixed(2)}`;
+
+      // Flip spins stochastically
+      state.quboSpins = state.quboSpins.map((s, idx) => {
+        if (idx === 2 || idx === 7) {
+          return Math.random() < 0.85 ? 1 : 0; // True outliers
+        }
+        return Math.random() < temp / 12 ? (Math.random() > 0.5 ? 1 : 0) : 0;
+      });
+
+      const currentEnergy = -1.2 * step - (Math.random() * 0.5);
+      state.quboEnergyTrace.push(currentEnergy);
+
+      drawQuboCanvas();
+
+      if (step >= maxSteps) {
+        clearInterval(annealInterval);
+        state.quboIsAnnealing = false;
+        state.quboTemp = 0.05;
+        if (el.quboTempDisplay) el.quboTempDisplay.textContent = 'T = 0.05 (Converged)';
+        state.quboSpins = [0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0];
+        state.quboEnergyTrace.push(-18.42);
+        drawQuboCanvas();
+        showToast('✓ Annealing Global Minimum Reached (2 Outliers Partitioned)!');
+      }
+    }, 120);
+  }
+
+  function flipRandomQuboSpins() {
+    state.quboSpins = state.quboSpins.map(() => (Math.random() > 0.7 ? 1 : 0));
+    state.quboEnergyTrace = [-1.5, -3.2, -6.1, -11.4];
+    drawQuboCanvas();
+    showToast('⚡ Random Qubit perturbation injected.');
+  }
+
+  // 2. MPS TENSOR NETWORK CANVAS
   function drawMpsCanvas() {
     if (!el.mpsCanvas) return;
     const ctx = el.mpsCanvas.getContext('2d');
@@ -473,21 +554,26 @@
     const numNodes = 8;
     const nodeRadius = 13;
     const stepX = (w - 70) / (numNodes - 1);
-    const cy = h / 2 + 8;
+    const cy = h / 2 + 10;
 
+    // Entangled Bond Spine
     ctx.strokeStyle = '#00f0ff';
+    ctx.shadowColor = '#00f0ff';
+    ctx.shadowBlur = 6;
     ctx.lineWidth = 2.5;
     ctx.beginPath();
     ctx.moveTo(35, cy);
     ctx.lineTo(35 + (numNodes - 1) * stepX, cy);
     ctx.stroke();
+    ctx.shadowBlur = 0;
 
+    // Bond Entropies
     state.mpsBondEntropies.forEach((entropy, i) => {
       const xMid = 35 + i * stepX + stepX / 2;
       ctx.fillStyle = entropy > 1.2 ? '#ef4444' : '#a855f7';
       ctx.font = '9px JetBrains Mono';
       ctx.textAlign = 'center';
-      ctx.fillText(`χ=4 (S=${entropy})`, xMid, cy - 18);
+      ctx.fillText(`χ=4 (S=${entropy})`, xMid, cy - 20);
 
       ctx.fillStyle = '#00f0ff';
       ctx.beginPath();
@@ -495,10 +581,12 @@
       ctx.fill();
     });
 
+    // Node Train
     for (let i = 0; i < numNodes; i++) {
       const cx = 35 + i * stepX;
 
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+      // Leg connection
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(cx, cy + nodeRadius);
@@ -510,8 +598,11 @@
       ctx.textAlign = 'center';
       ctx.fillText(`|φ(${i+1})⟩`, cx, cy + 42);
 
-      ctx.fillStyle = '#0a0e1a';
+      // Node Ring
+      ctx.fillStyle = state.mpsActiveNode === i ? '#a855f7' : '#0a0e1a';
       ctx.strokeStyle = i === 0 || i === 7 ? '#a855f7' : '#00f0ff';
+      ctx.shadowColor = ctx.strokeStyle;
+      ctx.shadowBlur = state.mpsActiveNode === i ? 12 : 4;
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(cx, cy, nodeRadius, 0, Math.PI * 2);
@@ -525,13 +616,39 @@
       ctx.fillText(`A^(${i+1})`, cx, cy);
     }
 
+    ctx.shadowBlur = 0;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
     ctx.fillStyle = '#8b9bb4';
     ctx.font = '10px JetBrains Mono';
-    ctx.fillText('MPS Tensor Train Contraction ⟨W | Ψ(v)⟩', 30, 16);
+    ctx.fillText('MPS Tensor Train Contraction ⟨W | Ψ(v)⟩', 30, 18);
   }
 
+  function runMpsLiveContraction() {
+    showToast('🌀 Contracting Matrix Product State train...');
+    let node = 0;
+    const mpsInterval = setInterval(() => {
+      state.mpsActiveNode = node;
+      node++;
+      drawMpsCanvas();
+      if (node >= 8) {
+        clearInterval(mpsInterval);
+        state.mpsActiveNode = -1;
+        drawMpsCanvas();
+        showToast('✓ Contraction complete: Non-linear feature entanglement classified!');
+      }
+    }, 100);
+  }
+
+  function perturbMpsClues() {
+    state.mpsBondEntropies = state.mpsBondEntropies.map(() => (0.3 + Math.random() * 1.8).toFixed(2));
+    const maxS = Math.max(...state.mpsBondEntropies);
+    if (el.mpsEntropyDisplay) el.mpsEntropyDisplay.textContent = `S = ${maxS}`;
+    drawMpsCanvas();
+    showToast('🌀 Tensor features perturbed.');
+  }
+
+  // 3. GROVER AMPLIFICATION CANVAS
   function drawGroverCanvas() {
     if (!el.groverCanvas) return;
     const ctx = el.groverCanvas.getContext('2d');
@@ -539,40 +656,72 @@
     const h = el.groverCanvas.height;
     ctx.clearRect(0, 0, w, h);
 
-    const history = state.groverData.history;
+    const history = state.groverData.history.slice(0, state.groverCurrentIndex + 1);
+    const fullHistory = state.groverData.history;
     const barWidth = 48;
-    const gap = 42;
-    const startX = 60;
-    const chartHeight = h - 60;
+    const gap = 45;
+    const startX = 65;
+    const chartHeight = h - 65;
 
     ctx.fillStyle = '#8b9bb4';
     ctx.font = '11px JetBrains Mono';
     ctx.fillText('Target State Probability Amplification P(target) = |⟨target | Ψ(k)⟩|²', startX, 18);
 
-    history.forEach((step, i) => {
+    fullHistory.forEach((step, i) => {
       const x = startX + i * (barWidth + gap);
-      const barH = step.p * chartHeight;
+      const isVisible = i <= state.groverCurrentIndex;
+      const pVal = isVisible ? step.p : 0.02;
+      const barH = pVal * chartHeight;
       const y = h - 28 - barH;
 
+      // Slot outline
       ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
       ctx.fillRect(x, h - 28 - chartHeight, barWidth, chartHeight);
 
-      const grad = ctx.createLinearGradient(0, y, 0, h - 28);
-      grad.addColorStop(0, '#10b981');
-      grad.addColorStop(1, '#00f0ff');
-      ctx.fillStyle = grad;
-      ctx.fillRect(x, y, barWidth, barH);
+      // Bar Fill
+      if (isVisible) {
+        const grad = ctx.createLinearGradient(0, y, 0, h - 28);
+        grad.addColorStop(0, '#10b981');
+        grad.addColorStop(1, '#00f0ff');
+        ctx.fillStyle = grad;
+        ctx.shadowColor = '#00f0ff';
+        ctx.shadowBlur = 8;
+        ctx.fillRect(x, y, barWidth, barH);
+        ctx.shadowBlur = 0;
 
-      ctx.fillStyle = '#fff';
+        ctx.fillStyle = '#fff';
+        ctx.font = '10px JetBrains Mono';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${(step.p * 100).toFixed(1)}%`, x + barWidth / 2, y - 6);
+      }
+
+      ctx.fillStyle = isVisible ? '#00f0ff' : '#57657a';
       ctx.font = '10px JetBrains Mono';
       ctx.textAlign = 'center';
-      ctx.fillText(`${(step.p * 100).toFixed(1)}%`, x + barWidth / 2, y - 5);
-
-      ctx.fillStyle = '#8b9bb4';
       ctx.fillText(`k=${step.k}`, x + barWidth / 2, h - 12);
     });
 
     ctx.textAlign = 'left';
+  }
+
+  function stepGroverLive() {
+    state.groverCurrentIndex = (state.groverCurrentIndex + 1) % 6;
+    const curr = state.groverData.history[state.groverCurrentIndex];
+    if (el.groverIterDisplay) {
+      el.groverIterDisplay.textContent = `k = ${curr.k} (P = ${(curr.p * 100).toFixed(1)}%)`;
+    }
+    drawGroverCanvas();
+    showToast(`⚡ Grover step k=${curr.k}: Probability amplified to ${(curr.p * 100).toFixed(1)}%!`);
+  }
+
+  function resetGroverState() {
+    state.groverCurrentIndex = 0;
+    const curr = state.groverData.history[0];
+    if (el.groverIterDisplay) {
+      el.groverIterDisplay.textContent = `k = ${curr.k} (P = ${(curr.p * 100).toFixed(1)}%)`;
+    }
+    drawGroverCanvas();
+    showToast('↺ Grover search reset to initial uniform superposition.');
   }
 
   function renderAllCanvases() {
@@ -673,7 +822,7 @@
         soarExecuted: false,
         attributions: { 'nonce_collision_entropy': 0.99, 'cross_ip_divergence': 0.88, 'geo_risk_score': 0.74 }
       });
-      state.groverData.history[5].p = 0.999;
+      state.groverCurrentIndex = 5;
       renderAllCanvases();
       showToast('🚨 Scenario 1: Nonce Collision caught via Grover Search!');
     } else if (scenarioNum === 2) {
@@ -757,6 +906,14 @@
   });
 
   el.btnToggleStream.addEventListener('click', toggleStreaming);
+
+  // Wire Interactive Algorithm Buttons
+  if (el.btnRunQuboLive) el.btnRunQuboLive.addEventListener('click', runQuboLiveSimulation);
+  if (el.btnFlipQuboSpins) el.btnFlipQuboSpins.addEventListener('click', flipRandomQuboSpins);
+  if (el.btnRunMpsLive) el.btnRunMpsLive.addEventListener('click', runMpsLiveContraction);
+  if (el.btnPerturbMps) el.btnPerturbMps.addEventListener('click', perturbMpsClues);
+  if (el.btnRunGroverLive) el.btnRunGroverLive.addEventListener('click', stepGroverLive);
+  if (el.btnResetGrover) el.btnResetGrover.addEventListener('click', resetGroverState);
 
   // --- MODAL & SOAR ACTIONS ---
   function openModal(alertId) {

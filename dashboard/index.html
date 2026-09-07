@@ -241,63 +241,97 @@
           </div>
         </div>
 
-        <!-- ==================== TAB 2: QUANTUM CORE ALGORITHMS ==================== -->
+        <!-- ==================== TAB 2: QUANTUM CORE ALGORITHMS (INTERACTIVE LAB) ==================== -->
         <div class="tab-panel" id="quantum-algorithms">
+          
           <div class="algo-showcase-grid">
             
-            <!-- QUBO Annealer -->
+            <!-- 1. QUBO Solver Interactive Card -->
             <div class="cyber-card">
               <div class="cyber-card-header">
                 <div class="header-left-title">
                   <span class="algo-tag qubo-tag">QUBO SOLVER</span>
                   <h3>Simulated Annealing Hamiltonian Outlier Solver</h3>
                 </div>
-                <span class="math-badge">\(\min \mathbf{x}^T \mathbf{Q} \mathbf{x}\)</span>
+                <span class="math-badge">min xᵀ·Q·x</span>
               </div>
               <div class="cyber-card-body">
                 <p class="algo-explanation-text">
-                  Maps signature telemetry vectors into an Ising spin glass Hamiltonian. Energy cools as temperature \(T \to 0\). Anomalous outliers flip to state \(x_i = 1\).
+                  Maps signature telemetry into an Ising spin glass Hamiltonian. As temperature cools (T → 0), normal signatures settle to 0, and anomalous outliers flip to state <strong>xᵢ = 1</strong>.
                 </p>
+
+                <!-- Interactive QUBO Controls -->
+                <div class="interactive-control-bar">
+                  <button class="btn-cyber-primary" id="btnRunQuboLive">▶️ Run Annealing Solver</button>
+                  <button class="btn-cyber-chip" id="btnFlipQuboSpins">⚡ Inject Random Outlier</button>
+                  <div class="live-temp-indicator">
+                    <span>Temp:</span>
+                    <strong class="text-cyan" id="quboTempDisplay">T = 0.05</strong>
+                  </div>
+                </div>
+
                 <div class="canvas-container">
-                  <canvas id="quboCanvas" width="500" height="200"></canvas>
+                  <canvas id="quboCanvas" width="520" height="210"></canvas>
                 </div>
               </div>
             </div>
 
-            <!-- Tensor Network -->
+            <!-- 2. MPS Tensor Network Interactive Card -->
             <div class="cyber-card">
               <div class="cyber-card-header">
                 <div class="header-left-title">
                   <span class="algo-tag mps-tag">MPS TENSOR NET</span>
                   <h3>Matrix Product State Entanglement Classifier</h3>
                 </div>
-                <span class="math-badge">\(\chi=4, \; O(d\cdot\chi^2)\)</span>
+                <span class="math-badge">χ = 4, O(d·χ²)</span>
               </div>
               <div class="cyber-card-body">
                 <p class="algo-explanation-text">
-                  Captures non-linear, multi-feature correlation anomalies (time, privilege, geo, latency) via 1D tensor train contractions without exponential scaling.
+                  Contracts multi-feature correlation vectors (time, caller, privilege, entropy) through a 1D quantum tensor train to detect non-linear supply chain anomalies in linear time.
                 </p>
+
+                <!-- Interactive MPS Controls -->
+                <div class="interactive-control-bar">
+                  <button class="btn-cyber-primary" id="btnRunMpsLive">⚡ Contract Tensor Train</button>
+                  <button class="btn-cyber-chip" id="btnPerturbMps">🌀 Perturb Feature Clues</button>
+                  <div class="live-temp-indicator">
+                    <span>Max Entropy:</span>
+                    <strong class="text-purple" id="mpsEntropyDisplay">S = 1.84</strong>
+                  </div>
+                </div>
+
                 <div class="canvas-container">
-                  <canvas id="mpsCanvas" width="500" height="200"></canvas>
+                  <canvas id="mpsCanvas" width="520" height="210"></canvas>
                 </div>
               </div>
             </div>
 
-            <!-- Grover Search -->
+            <!-- 3. Grover Amplitude Amplification Search Card -->
             <div class="cyber-card full-span-card">
               <div class="cyber-card-header">
                 <div class="header-left-title">
                   <span class="algo-tag grover-tag">GROVER SEARCH</span>
                   <h3>Amplitude Amplification on Distributed Nonce Graph</h3>
                 </div>
-                <span class="math-badge">\(k_{\text{opt}} \approx \frac{\pi}{4}\sqrt{\frac{N}{M}}\)</span>
+                <span class="math-badge">k_opt ≈ (π/4)·√(N/M)</span>
               </div>
               <div class="cyber-card-body">
                 <p class="algo-explanation-text">
-                  Provides quadratic speedup for finding cross-IP ECDSA nonce collision reuse in large transaction spaces. Amplifies target probability to 99.8% in optimal steps.
+                  Provides quadratic speedup for detecting cross-IP ECDSA nonce collision reuse in large transaction spaces. Amplifies target probability to <strong>99.8%</strong> in optimal iterations.
                 </p>
+
+                <!-- Interactive Grover Controls -->
+                <div class="interactive-control-bar">
+                  <button class="btn-cyber-primary" id="btnRunGroverLive">▶️ Step Grover Diffusion Operator</button>
+                  <button class="btn-cyber-chip" id="btnResetGrover">↺ Reset Probability</button>
+                  <div class="live-temp-indicator">
+                    <span>Current Iteration:</span>
+                    <strong class="text-success" id="groverIterDisplay">k = 18 (P = 99.8%)</strong>
+                  </div>
+                </div>
+
                 <div class="canvas-container">
-                  <canvas id="groverCanvas" width="750" height="200"></canvas>
+                  <canvas id="groverCanvas" width="780" height="210"></canvas>
                 </div>
               </div>
             </div>

@@ -443,8 +443,6 @@ body.cyber-dark-theme, body.dark-theme {
 }
 
 .cyber-stat-card {
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.05);
   padding: 12px 14px;
   border-radius: var(--radius-sm);
   display: flex;
@@ -727,12 +725,31 @@ body.cyber-dark-theme, body.dark-theme {
 }
 
 /* ==========================================================================
-   TAB 2: ALGORITHM SHOWCASE
+   TAB 2: ALGORITHM SHOWCASE & INTERACTIVE LAB
    ========================================================================== */
 .algo-showcase-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
+}
+
+.interactive-control-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  flex-wrap: wrap;
+}
+
+.live-temp-indicator {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
 }
 
 .algo-tag {
@@ -750,11 +767,11 @@ body.cyber-dark-theme, body.dark-theme {
 .math-badge {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--text-secondary);
+  color: var(--accent-cyan);
   background: rgba(0, 0, 0, 0.4);
   padding: 3px 8px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 240, 255, 0.2);
 }
 
 .algo-explanation-text {
@@ -777,7 +794,7 @@ body.cyber-dark-theme, body.dark-theme {
 .canvas-container canvas {
   width: 100%;
   height: auto;
-  max-height: 200px;
+  max-height: 210px;
 }
 
 /* ==========================================================================
@@ -877,14 +894,16 @@ body.cyber-dark-theme, body.dark-theme {
   background: rgba(0, 240, 255, 0.1);
   border: 1px solid rgba(0, 240, 255, 0.3);
   color: var(--accent-cyan);
-  padding: 4px 8px;
+  padding: 5px 10px;
   border-radius: var(--radius-sm);
   font-size: 11px;
   cursor: pointer;
+  font-weight: 600;
 }
 
 .btn-cyber-chip:hover {
-  background: rgba(0, 240, 255, 0.2);
+  background: rgba(0, 240, 255, 0.25);
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
 }
 
 .cyber-textarea {
