@@ -319,21 +319,24 @@
       item.className = `alert-item-box severity-${alert.severity} ${alert.soarExecuted ? 'soar-executed' : ''}`;
       item.innerHTML = `
         <div class="alert-head-row">
-          <span class="alert-badge ${alert.severity}">${alert.severity} THREAT</span>
-          <span class="alert-time">${alert.time}</span>
+          <div class="alert-badge-wrap">
+            <span class="alert-badge ${alert.severity}"><span class="pulse-dot-red"></span> ${alert.severity} THREAT</span>
+            <span class="alert-mitre-tag">${alert.mitre || 'MITRE T1552'}</span>
+          </div>
+          <span class="alert-time">⏱️ ${alert.time}</span>
         </div>
         <div class="alert-title-text">${alert.title}</div>
         <div class="alert-meta-details">
-          <span><strong>Target Key:</strong> ${alert.keyId}</span>
-          <span><strong>Engine:</strong> ${alert.engine}</span>
-          <span><strong>Certainty:</strong> ${(alert.confidence * 100).toFixed(1)}%</span>
+          <span class="meta-chip chip-key">🔑 <strong>Key:</strong> <code>${alert.keyId}</code></span>
+          <span class="meta-chip chip-engine">🧠 <strong>Engine:</strong> ${alert.engine}</span>
+          <span class="meta-chip chip-confidence">🎯 <strong>Confidence:</strong> ${(alert.confidence * 100).toFixed(1)}%</span>
         </div>
         <div class="alert-action-row">
           <button class="btn-cyber-triage" data-id="${alert.id}">🔍 View Explainability & SOAR</button>
           ${
             alert.soarExecuted
-              ? `<span class="soar-done-tag">✓ SOAR Neutralized</span>`
-              : `<button class="btn-cyber-alert" data-id="${alert.id}">⚡ Quarantine Key</button>`
+              ? `<span class="soar-done-tag">🛡️ SOAR Neutralized (PQC Active)</span>`
+              : `<button class="btn-cyber-alert" data-id="${alert.id}">⚡ 1-Click Lockdown</button>`
           }
         </div>
       `;
