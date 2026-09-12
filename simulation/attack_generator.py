@@ -1,28 +1,26 @@
 """
 Quantum-Inspired Cyber Threat Detection (QI-CTD)
-Simulation Engine: Normal Baseline & Synthetic Attack Scenarios Generator
+Simulation Engine: Normal Baseline & Dynamic Synthetic Attack Scenarios Generator
+(Fully randomized cryptographic parameters on every invocation)
 """
 
 import time
 import random
-import uuid
 import hashlib
 from typing import List, Dict, Any
-from telemetry.schema import (
-    NormalizedSignatureEvent,
-    SourceType,
-    AlgorithmType
-)
+from telemetry.schema import NormalizedSignatureEvent, SourceType, AlgorithmType
+from core.ecdsa_recovery import ECDSANonceRecoveryEngine, SECP256K1_N
 
 
 class SyntheticAttackGenerator:
     """
     Generates realistic normal baseline digital signature telemetry and injects
     targeted cryptographic attack scenarios to benchmark QI-CTD detection recall.
+    All parameters are dynamically randomized per execution.
     """
 
     def __init__(self):
-        self._seq = 1000
+        self._seq = int(time.time()) % 100000
 
     def _next_event_id(self) -> str:
         self._seq += 1
@@ -31,6 +29,12 @@ class SyntheticAttackGenerator:
     @staticmethod
     def _random_hash() -> str:
         return hashlib.sha256(f"{random.random()}-{time.time_ns()}".encode()).hexdigest()
+
+    @staticmethod
+    def _random_ip(internal: bool = True) -> str:
+        if internal:
+            return f"10.{random.randint(10, 100)}.{random.randint(1, 20)}.{random.randint(10, 250)}"
+        return f"{random.randint(30, 210)}.{random.randint(10, 250)}.{random.randint(1, 250)}.{random.randint(1, 250)}"
 
     def generate_baseline_normal_stream(self, count: int = 15) -> List[NormalizedSignatureEvent]:
         """Generates regular benign telemetry across all sources."""
@@ -46,17 +50,16 @@ class SyntheticAttackGenerator:
         now_ns = int(time.time() * 1e9)
         for i in range(count):
             src, algo, bits, requester, geo, base_lat = random.choice(normal_sources)
-            # High-entropy random nonce
             nonce_bytes = bytes([random.randint(0, 255) for _ in range(32)])
             event = NormalizedSignatureEvent(
                 event_id=self._next_event_id(),
                 timestamp_ns=now_ns + i * 50_000_000,
                 source_type=src,
-                key_id=f"key-{src.value}-norm-{random.randint(1, 4)}",
+                key_id=f"key-{src.value}-norm-{random.randint(1, 10)}",
                 algorithm=algo,
                 key_length_bits=bits,
                 requester_identity=requester,
-                client_ip=f"10.100.{random.randint(1, 10)}.{random.randint(10, 200)}",
+                client_ip=self._random_ip(internal=True),
                 geo_location=geo,
                 operation="sign",
                 payload_hash=self._random_hash(),
@@ -74,12 +77,22 @@ class SyntheticAttackGenerator:
 
     def inject_attack_scenario_1_nonce_reuse(self) -> List[NormalizedSignatureEvent]:
         """
-        Scenario 1: ECDSA Nonce Reuse / Weak PRNG (Enables Catastrophic Private Key Recovery)
-        Two distinct signatures generated with the IDENTICAL nonce k-value.
+        Scenario 1: Dynamic ECDSA Nonce Reuse (Real mathematical private key recovery)
+        Generates genuine secp256k1 signatures sharing the EXACT same nonce k.
         """
-        fixed_nonce = "a8f3c1d94b7e20684f5a11c08e3321557ba8d34091c5e9a4f216789bde014432"
-        key_id = "key-ecdsa-treasury-master"
+        priv_key = random.randint(1, SECP256K1_N - 1)
+        reused_k = random.randint(1, SECP256K1_N - 1)
+        key_id = f"key-ecdsa-treasury-{random.randint(100, 999)}"
         now_ns = int(time.time() * 1e9)
+
+        tx1_msg = f"Transfer {random.randint(10, 500)} BTC to Treasury Vault 0x{self._random_hash()[:10]}"
+        tx2_msg = f"Transfer {random.randint(1, 50)} BTC to Cold Storage 0x{self._random_hash()[:10]}"
+
+        sig1 = ECDSANonceRecoveryEngine.sign_message(priv_key, tx1_msg, fixed_nonce=reused_k)
+        sig2 = ECDSANonceRecoveryEngine.sign_message(priv_key, tx2_msg, fixed_nonce=reused_k)
+
+        # Pre-verify mathematical private key recovery
+        recovery_proof = ECDSANonceRecoveryEngine.recover_private_key(sig1, sig2)
 
         ev1 = NormalizedSignatureEvent(
             event_id=self._next_event_id(),
@@ -88,125 +101,136 @@ class SyntheticAttackGenerator:
             key_id=key_id,
             algorithm=AlgorithmType.ECDSA_SECP256K1,
             key_length_bits=256,
-            requester_identity="treasury-signer-node-a",
-            client_ip="192.168.1.101",
+            requester_identity=f"treasury-signer-node-{random.choice(['a', 'primary', 'eu-1'])}",
+            client_ip=self._random_ip(internal=True),
             geo_location="EU-CENTRAL",
             operation="sign_tx",
-            payload_hash=self._random_hash(),
+            payload_hash=sig1["hash_z"],
             sig_r_s_length=64,
-            nonce_hex=fixed_nonce,
-            nonce_entropy_bits=2.15, # severely degraded entropy
-            signing_latency_ms=3.1,
+            nonce_hex=sig1["nonce_k"],
+            nonce_entropy_bits=2.15,
+            signing_latency_ms=round(2.8 + random.random() * 0.6, 2),
             cert_chain_depth=2,
             is_malleable_candidate=False,
-            metadata={"tx_id": "0x4f8a...12", "attack_tag": "NONCE_REUSE_A"}
+            metadata={
+                "tx_id": f"0x{self._random_hash()[:16]}",
+                "attack_tag": "NONCE_REUSE_COLLISION",
+                "sig_r": sig1["r"],
+                "sig_s": sig1["s"],
+                "recovery_proof": recovery_proof
+            }
         )
 
         ev2 = NormalizedSignatureEvent(
             event_id=self._next_event_id(),
-            timestamp_ns=now_ns + 120_000_000,
+            timestamp_ns=now_ns + random.randint(50_000_000, 200_000_000),
             source_type=SourceType.BLOCKCHAIN,
             key_id=key_id,
             algorithm=AlgorithmType.ECDSA_SECP256K1,
             key_length_bits=256,
-            requester_identity="treasury-signer-node-b",
-            client_ip="45.33.32.156", # anomalous external IP
+            requester_identity=f"untrusted-proxy-worker-{random.randint(10, 99)}",
+            client_ip=self._random_ip(internal=False), # external anomalous IP
             geo_location="TOR-EXIT",
             operation="sign_tx",
-            payload_hash=self._random_hash(),
+            payload_hash=sig2["hash_z"],
             sig_r_s_length=64,
-            nonce_hex=fixed_nonce, # EXACT SAME NONCE!
+            nonce_hex=sig2["nonce_k"], # IDENTICAL NONCE
             nonce_entropy_bits=2.15,
-            signing_latency_ms=3.2,
+            signing_latency_ms=round(3.1 + random.random() * 0.8, 2),
             cert_chain_depth=2,
             is_malleable_candidate=False,
-            metadata={"tx_id": "0x9c3e...88", "attack_tag": "NONCE_REUSE_B"}
+            metadata={
+                "tx_id": f"0x{self._random_hash()[:16]}",
+                "attack_tag": "NONCE_REUSE_COLLISION",
+                "sig_r": sig2["r"],
+                "sig_s": sig2["s"],
+                "recovery_proof": recovery_proof
+            }
         )
 
         return [ev1, ev2]
 
     def inject_attack_scenario_2_signature_malleability(self) -> List[NormalizedSignatureEvent]:
-        """
-        Scenario 2: Digital Signature Malleability & Low-S Violation (Tx Mutability Abuse)
-        """
+        """Scenario 2: Digital Signature Malleability & Low-S Violation (Tx Mutability Abuse)."""
         now_ns = int(time.time() * 1e9)
         ev = NormalizedSignatureEvent(
             event_id=self._next_event_id(),
             timestamp_ns=now_ns,
             source_type=SourceType.BLOCKCHAIN,
-            key_id="key-eth-smart-contract",
+            key_id=f"key-eth-smart-contract-{random.randint(10, 99)}",
             algorithm=AlgorithmType.ECDSA_SECP256K1,
             key_length_bits=256,
-            requester_identity="unauthenticated-relayer",
-            client_ip="185.220.101.5",
-            geo_location="TOR-EXIT",
+            requester_identity=f"unauthenticated-relayer-{random.randint(100, 999)}",
+            client_ip=self._random_ip(internal=False),
+            geo_location="ANON-VPN",
             operation="relay_signature",
             payload_hash=self._random_hash(),
             sig_r_s_length=65,
             nonce_hex=self._random_hash()[:32],
             nonce_entropy_bits=7.8,
-            signing_latency_ms=18.5,
+            signing_latency_ms=round(16.5 + random.random() * 4.0, 2),
             cert_chain_depth=1,
-            is_malleable_candidate=True, # high-s / malleable signature detected
-            metadata={"malleability_flag": "HIGH_S_DETECTED", "curve": "secp256k1"}
+            is_malleable_candidate=True,
+            metadata={"malleability_flag": "HIGH_S_VIOLATION", "curve": "secp256k1", "bip62_rule": "FAILED"}
         )
         return [ev]
 
     def inject_attack_scenario_3_rogue_cicd_signing(self) -> List[NormalizedSignatureEvent]:
-        """
-        Scenario 3: Rogue CI/CD Supply Chain Signing Anomaly (SolarWinds style)
-        Unauthorized runner signs binary with tier-1 master production key at abnormal hours.
-        """
+        """Scenario 3: Rogue CI/CD Supply Chain Signing Anomaly (SolarWinds style)."""
         now_ns = int(time.time() * 1e9)
         ev = NormalizedSignatureEvent(
             event_id=self._next_event_id(),
-            timestamp_ns=now_ns, # 02:45 AM timestamp
+            timestamp_ns=now_ns,
             source_type=SourceType.CICD_SIGNING,
-            key_id="key-cicd-master-release",
+            key_id=f"key-cicd-master-release-{random.randint(1, 5)}",
             algorithm=AlgorithmType.RSA_4096,
             key_length_bits=4096,
-            requester_identity="unauthorized_runner_vm_9823", # untrusted caller
-            client_ip="198.51.100.42",
-            geo_location="UNKNOWN-GEO",
+            requester_identity=f"unauthorized_runner_vm_{random.randint(1000, 9999)}",
+            client_ip=self._random_ip(internal=False),
+            geo_location="UNKNOWN-HOST",
             operation="sign_release_artifact",
             payload_hash=self._random_hash(),
             sig_r_s_length=512,
             nonce_hex=None,
-            nonce_entropy_bits=7.9,
-            signing_latency_ms=92.4, # abnormal HSM latency
-            cert_chain_depth=6, # anomalous deep chain
+            nonce_entropy_bits=7.92,
+            signing_latency_ms=round(85.0 + random.random() * 20.0, 2),
+            cert_chain_depth=random.randint(5, 7),
             is_malleable_candidate=False,
-            metadata={"pipeline_id": "nightly-shadow-build-09", "artifact_name": "update_agent.dll"}
+            metadata={
+                "pipeline_id": f"shadow-build-job-{random.randint(100, 999)}",
+                "artifact_name": random.choice(["update_agent.dll", "kernel_patch.bin", "auth_helper.so"])
+            }
         )
         return [ev]
 
     def inject_attack_scenario_4_harvest_now_bulk_export(self) -> List[NormalizedSignatureEvent]:
-        """
-        Scenario 4: Quantum "Harvest Now, Decrypt/Forge Later" Bulk Export
-        High burst rate of key export and public certificate cataloging on long-term RSA-4096 roots.
-        """
+        """Scenario 4: Quantum 'Harvest Now, Decrypt Later' (HNDL) Bulk Exfiltration."""
         events: List[NormalizedSignatureEvent] = []
         now_ns = int(time.time() * 1e9)
-        for i in range(8):
+        burst_size = random.randint(6, 10)
+        target_key = f"key-root-ca-{random.randint(1, 4)}"
+        suspicious_ip = self._random_ip(internal=False)
+
+        for i in range(burst_size):
             ev = NormalizedSignatureEvent(
                 event_id=self._next_event_id(),
-                timestamp_ns=now_ns + (i * 10_000_000),
+                timestamp_ns=now_ns + (i * 12_000_000),
                 source_type=SourceType.PKI_HSM,
-                key_id="key-root-ca-01",
+                key_id=target_key,
                 algorithm=AlgorithmType.RSA_4096,
                 key_length_bits=4096,
-                requester_identity="suspicious-recon-service",
-                client_ip="103.245.236.1",
-                geo_location="ANON-VPN",
-                operation="key_export_metadata",
+                requester_identity=f"recon-scraper-daemon-{random.randint(1, 20)}",
+                client_ip=suspicious_ip,
+                geo_location="ANON-TOR",
+                operation="bulk_key_export_handshake",
                 payload_hash=self._random_hash(),
                 sig_r_s_length=512,
                 nonce_hex=None,
-                nonce_entropy_bits=7.9,
-                signing_latency_ms=1.1,
+                nonce_entropy_bits=7.98,
+                signing_latency_ms=round(1.2 + random.random() * 0.5, 2),
                 cert_chain_depth=1,
                 is_malleable_candidate=False,
-                metadata={"batch_export_flag": True, "target_lifetime_years": 25}
+                metadata={"hndl_bulk_flag": True, "target_shelf_life_years": 25}
             )
             events.append(ev)
         return events

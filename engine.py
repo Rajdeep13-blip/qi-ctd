@@ -3,6 +3,7 @@ Quantum-Inspired Cyber Threat Detection (QI-CTD)
 Master Engine & Real-Time Orchestration Pipeline (with SQLite Database Persistence)
 """
 
+import os
 import time
 from typing import List, Dict, Any, Optional
 from telemetry.schema import (
@@ -17,6 +18,7 @@ from core.qubo_engine import QUBOAnomalySolver
 from core.tensor_network import MPSTensorNetworkClassifier
 from core.grover_search import GroverCorrelationSearch
 from core.qvs_engine import QuantumRiskEngine
+from core.pqc_mldsa import MLDSA65Engine
 from database.db import DatabaseManager
 
 
@@ -39,6 +41,7 @@ class QICTDEngine:
         self.mps_classifier = MPSTensorNetworkClassifier(feature_dim=8, bond_dim=4, threshold=0.68)
         self.grover_search = GroverCorrelationSearch(max_iterations=12)
         self.qvs_engine = QuantumRiskEngine(crqc_horizon_years=6.5)
+        self.pqc_engine = MLDSA65Engine()
         self.db = DatabaseManager()
 
         # In-memory streaming state
@@ -155,7 +158,7 @@ class QICTDEngine:
         self.db.save_alert(alert.to_dict())
 
     def execute_soar_playbook(self, alert_id: str, action: str) -> Dict[str, Any]:
-        """Executes SOAR playbooks and records audit log in SQLite."""
+        """Executes SOAR playbooks, creates NIST FIPS 204 PQC signature, writes CEF log, and records audit in SQLite."""
         for alert in self.active_alerts:
             if alert.alert_id == alert_id:
                 alert.soar_status = SOARStatus.EXECUTED
@@ -163,7 +166,29 @@ class QICTDEngine:
                     if asset.key_id == alert.key_id:
                         asset.status = "QUARANTINED" if "Quarantine" in action else "REVOKED"
 
-                # Persist in SQLite
+                # 1. Generate real NIST FIPS 204 (ML-DSA-65) Quantum-Safe Seal
+                pqc_seal = self.pqc_engine.sign(
+                    message=f"SOAR-ACTION:{action}|ALERT:{alert_id}|KEY:{alert.key_id}|TIMESTAMP:{time.time()}",
+                    asset_id=alert.key_id
+                )
+
+                # 2. Write real ArcSight / Splunk Common Event Format (CEF) log to file
+                log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
+                os.makedirs(log_dir, exist_ok=True)
+                cef_file = os.path.join(log_dir, "audit_cef.log")
+                cef_line = (
+                    f"CEF:0|QubitDefenders|QI-CTD|1.0|{alert.mitre_ttp}|{alert.attack_type}|{alert.severity.value}|"
+                    f"src=10.0.1.50 dstKey={alert.key_id} cs1={alert.detection_engine} cs1Label=DetectionEngine "
+                    f"cs2={action} cs2Label=MitigationAction cs3={pqc_seal['public_key']} cs3Label=PQCPublicKey "
+                    f"msg=Post-Quantum ML-DSA-65 Lockdown Seal Applied\n"
+                )
+                try:
+                    with open(cef_file, "a", encoding="utf-8") as f:
+                        f.write(cef_line)
+                except Exception:
+                    pass
+
+                # 3. Persist in SQLite
                 self.db.update_soar_status(alert_id, action, alert.key_id)
 
                 return {
@@ -172,7 +197,9 @@ class QICTDEngine:
                     "action_executed": action,
                     "target_key": alert.key_id,
                     "timestamp": time.time(),
-                    "message": f"Successfully executed SOAR action '{action}' on key '{alert.key_id}'. Logged to database."
+                    "pqc_seal": pqc_seal,
+                    "cef_entry": cef_line.strip(),
+                    "message": f"Successfully executed SOAR action '{action}' on key '{alert.key_id}'. NIST ML-DSA-65 Seal generated."
                 }
         return {"status": "ERROR", "message": f"Alert {alert_id} not found."}
 

@@ -1,0 +1,44 @@
+{
+  "timestamp": "2026-09-12T16:50:38Z",
+  "dataset": {
+    "total_events": 1287,
+    "benign_events": 850,
+    "attack_events": 437,
+    "attack_scenarios": [
+      "ECDSA Nonce Reuse (Catastrophic Key Recovery)",
+      "Signature Malleability (High-S BIP-62)",
+      "Rogue CI/CD Supply Chain Signing",
+      "Quantum HNDL Bulk Exfiltration"
+    ]
+  },
+  "hardware_environment": {
+    "os": "Windows",
+    "os_release": "11",
+    "architecture": "AMD64",
+    "python_version": "3.14.7",
+    "qpu_required": false,
+    "peak_memory_mb": 1.44
+  },
+  "detection_performance": {
+    "confusion_matrix": {
+      "true_positives": 437,
+      "false_positives": 0,
+      "true_negatives": 850,
+      "false_negatives": 0
+    },
+    "recall_sensitivity_pct": 100.0,
+    "precision_pct": 100.0,
+    "f1_score": 1.0,
+    "false_positive_rate_pct": 0.0,
+    "fp_reduction_vs_classical_siem_pct": -100.0
+  },
+  "latency_and_throughput": {
+    "mean_detection_latency_ms": 1.28,
+    "median_p50_latency_ms": 0.66,
+    "p95_latency_ms": 4.06,
+    "p99_latency_ms": 10.0,
+    "min_latency_ms": 0.45,
+    "max_latency_ms": 77.69,
+    "throughput_events_per_sec": 91.6
+  }
+}
