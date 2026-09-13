@@ -19,6 +19,7 @@ from core.tensor_network import MPSTensorNetworkClassifier
 from core.grover_search import GroverCorrelationSearch
 from core.qvs_engine import QuantumRiskEngine
 from core.pqc_mldsa import MLDSA65Engine
+from core.doc_verifier import DocumentVerificationEngine
 from database.db import DatabaseManager
 
 
@@ -31,7 +32,8 @@ class QICTDEngine:
     4. Runs Grover Amplitude Amplification for correlation graph searching.
     5. Evaluates Quantum Vulnerability Scores (QVS).
     6. Dispatches MITRE-mapped alerts and handles SOAR automated playbooks.
-    7. Persists all events, alerts, and audit records into SQLite database.
+    7. User-Centric Visual Document Verifier & Indian Ecosystem Engine.
+    8. Persists all events, alerts, and audit records into SQLite database.
     """
 
     def __init__(self, batch_window_size: int = 15):
@@ -42,6 +44,7 @@ class QICTDEngine:
         self.grover_search = GroverCorrelationSearch(max_iterations=12)
         self.qvs_engine = QuantumRiskEngine(crqc_horizon_years=6.5)
         self.pqc_engine = MLDSA65Engine()
+        self.doc_verifier = DocumentVerificationEngine()
         self.db = DatabaseManager()
 
         # In-memory streaming state

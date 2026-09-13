@@ -179,7 +179,12 @@ class QICTDPublicServerHandler(BaseHTTPRequestHandler):
                 "cef_logs": cef_lines[-50:]
             })
 
-        # 9. REST API: Health Check
+        # 9. REST API: GET /api/v1/doc/presets (Indian Document Samples)
+        elif path == "/api/v1/doc/presets":
+            presets = ENGINE.doc_verifier.get_presets()
+            self._send_json_response(200, {"status": "SUCCESS", "count": len(presets), "presets": presets})
+
+        # 10. REST API: Health Check
         elif path == "/health":
             self._send_json_response(200, {
                 "service": "QI-CTD Quantum-Inspired Detection Backend",
@@ -290,6 +295,72 @@ class QICTDPublicServerHandler(BaseHTTPRequestHandler):
             count = int(body.get("count", 250))
             report = run_benchmark_suite(num_events=count)
             self._send_json_response(200, {"status": "SUCCESS", "benchmark": report})
+
+        # 7. Document Verification: POST /api/v1/doc/verify
+        elif path == "/api/v1/doc/verify":
+            preset_id = body.get("preset_id")
+            doc_payload = body.get("document")
+            lang = body.get("lang", "en")
+
+            if preset_id:
+                result = ENGINE.doc_verifier.verify_document_by_id(preset_id, lang=lang)
+            elif doc_payload:
+                result = ENGINE.doc_verifier.verify_document_payload(doc_payload, lang=lang)
+            else:
+                result = ENGINE.doc_verifier.verify_document_by_id("doc-aadhaar-esign-01", lang=lang)
+
+            self._send_json_response(200, {"status": "SUCCESS", "verification": result})
+
+        # 8. Batch Document Verification: POST /api/v1/doc/batch-verify
+        elif path == "/api/v1/doc/batch-verify":
+            documents = body.get("documents")
+            lang = body.get("lang", "en")
+            if not documents:
+                documents = ENGINE.doc_verifier.presets
+            batch_result = ENGINE.doc_verifier.process_batch(documents, lang=lang)
+            self._send_json_response(200, {"status": "SUCCESS", "batch": batch_result})
+
+        # 9. Bot Simulator (WhatsApp / Telegram): POST /api/v1/integrations/bot-simulate
+        elif path == "/api/v1/integrations/bot-simulate":
+            doc_id = body.get("doc_id", "doc-aadhaar-esign-01")
+            channel = body.get("channel", "whatsapp")
+            lang = body.get("lang", "en")
+            v = ENGINE.doc_verifier.verify_document_by_id(doc_id, lang=lang)
+
+            # Build conversational bot response
+            verdict = v["verdict"]
+            safety = v["safety_score"]
+            diff = v["tamper_diff"]
+
+            bot_text = (
+                f"*🛡️ QuantumShield Verification Report*\n"
+                f"━━━━━━━━━━━━━━━━━━━\n"
+                f"📄 *Doc:* {v['document_name']}\n"
+                f"👤 *Signer:* {v['signer']}\n"
+                f"🏛️ *CA:* {v['issuer']}\n\n"
+                f"*Verdict:* {verdict['badge']}\n"
+                f"📊 *Safety Score:* {safety['score']}/100 ({safety['label']})\n"
+                f"💡 *Summary:* {verdict['description']}\n\n"
+            )
+            if diff:
+                bot_text += (
+                    f"⚠️ *ALTERATION FOUND:*\n"
+                    f"• Original: `{diff['original_value']}`\n"
+                    f"• Modified: `{diff['tampered_value']}`\n\n"
+                )
+            bot_text += (
+                f"⚖️ *Advice:*\n"
+                f"• Bank/KYC: {'✅ Valid' if verdict['code'] == 'SAFE' else '❌ Do Not Accept'}\n"
+                f"• Court: {'✅ Admissible' if verdict['code'] == 'SAFE' else '❌ Inadmissible'}\n\n"
+                f"🔒 _Verified with Quantum-Inspired Integrity Engine_"
+            )
+
+            self._send_json_response(200, {
+                "status": "SUCCESS",
+                "channel": channel,
+                "reply_text": bot_text,
+                "verification": v
+            })
 
         else:
             self._send_json_response(404, {"error": "Not Found", "path": path})

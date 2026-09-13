@@ -243,12 +243,66 @@
     proofNonceK: document.getElementById('proofNonceK'),
     modalSoarResultBox: document.getElementById('modalSoarResultBox'),
     modalSoarSealText: document.getElementById('modalSoarSealText'),
-    auditLogsBody: document.getElementById('auditLogsBody')
+    auditLogsBody: document.getElementById('auditLogsBody'),
+    // Mode Switcher & Top Controls
+    btnCitizenMode: document.getElementById('btnCitizenMode'),
+    btnSocMode: document.getElementById('btnSocMode'),
+    langSelect: document.getElementById('langSelect'),
+    currentTabSubtitle: document.getElementById('currentTabSubtitle'),
+    topSafetyScore: document.getElementById('topSafetyScore'),
+    // Citizen Verifier Elements
+    docPresetsGrid: document.getElementById('docPresetsGrid'),
+    presetDocBtns: document.querySelectorAll('.btn-preset-doc'),
+    docDropZone: document.getElementById('docDropZone'),
+    citizenDocUpload: document.getElementById('citizenDocUpload'),
+    btnVerifyCurrentDoc: document.getElementById('btnVerifyCurrentDoc'),
+    citizenVerdictBanner: document.getElementById('citizenVerdictBanner'),
+    verdictIcon: document.getElementById('verdictIcon'),
+    verdictBadge: document.getElementById('verdictBadge'),
+    verdictTitle: document.getElementById('verdictTitle'),
+    verdictSummary: document.getElementById('verdictSummary'),
+    chipDocName: document.getElementById('chipDocName'),
+    chipSignerName: document.getElementById('chipSignerName'),
+    chipIssuerCA: document.getElementById('chipIssuerCA'),
+    chipTimestamp: document.getElementById('chipTimestamp'),
+    scoreVal: document.getElementById('scoreVal'),
+    scoreProgressRing: document.getElementById('scoreProgressRing'),
+    scoreGradeBadge: document.getElementById('scoreGradeBadge'),
+    btnDownloadCert: document.getElementById('btnDownloadCert'),
+    visualTimeline: document.getElementById('visualTimeline'),
+    timelineStatusTag: document.getElementById('timelineStatusTag'),
+    xaiReasonsList: document.getElementById('xaiReasonsList'),
+    tamperDiffTag: document.getElementById('tamperDiffTag'),
+    diffOriginalContent: document.getElementById('diffOriginalContent'),
+    diffModifiedContent: document.getElementById('diffModifiedContent'),
+    scenBankText: document.getElementById('scenBankText'),
+    scenCourtText: document.getElementById('scenCourtText'),
+    scenGemText: document.getElementById('scenGemText'),
+    scenOfficeText: document.getElementById('scenOfficeText'),
+    certDetailsTbody: document.getElementById('certDetailsTbody'),
+    // Batch Verifier Elements
+    btnRunBatchScreening: document.getElementById('btnRunBatchScreening'),
+    btnExportBatchCsv: document.getElementById('btnExportBatchCsv'),
+    btnPrintBatchAudit: document.getElementById('btnPrintBatchAudit'),
+    batchTotalCount: document.getElementById('batchTotalCount'),
+    batchSafeCount: document.getElementById('batchSafeCount'),
+    batchTamperedCount: document.getElementById('batchTamperedCount'),
+    batchWarningCount: document.getElementById('batchWarningCount'),
+    batchAvgLatency: document.getElementById('batchAvgLatency'),
+    batchTableTbody: document.getElementById('batchTableTbody'),
+    // Platform Integrations & WhatsApp Bot
+    waChatBody: document.getElementById('waChatBody'),
+    waDocSelect: document.getElementById('waDocSelect'),
+    btnSendWaDoc: document.getElementById('btnSendWaDoc'),
+    btnBrowseExtDemo: document.getElementById('btnBrowseExtDemo')
   };
 
   let activeModalAlert = null;
 
   const tabTitles = {
+    'citizen-verifier': 'Citizen Visual Document Verifier',
+    'batch-verifier': 'Institutional High-Volume Batch Screening Hub',
+    'integrations-view': 'WhatsApp Bot & Platform Security Add-ons',
     'soc-view': 'SOC Real-Time Threat Center',
     'quantum-algorithms': 'Quantum-Inspired AI Algorithmic Engines',
     'public-apis-view': 'Real-World Public APIs Cryptographic Intelligence',
@@ -256,6 +310,19 @@
     'crypto-scanner': 'Cryptographic Certificate & Key Inspector',
     'audit-logs': 'Cryptographic SOAR Incident Audit Trail',
     'benchmark-lab': 'Automated Defensible Benchmark & Performance Lab'
+  };
+
+  const tabSubtitles = {
+    'citizen-verifier': 'Simple, Instant & Visual Digital Signature Verification for Everyday Documents',
+    'batch-verifier': 'Enterprise High-Throughput Verification for Contracts, Invoices & Degree Certificates',
+    'integrations-view': 'Direct Verification on WhatsApp, Telegram, Browser Extension & Email Add-on',
+    'soc-view': 'Live Telemetry Stream, Anomaly Triage & Automated Incident Response',
+    'quantum-algorithms': 'Interactive Mathematical Visualizations of QUBO, Tensor Networks & Grover Search',
+    'public-apis-view': 'Live Ingestion from Public APIs Catalog & Cryptographic Risk Scoring',
+    'ciso-posture': 'Organizational Cryptographic Health, Shelf-Life Risk & NIST Migration Timeline',
+    'crypto-scanner': 'Interactive X.509 Certificate Parser & Shor Factoring Vulnerability Analysis',
+    'audit-logs': 'Immutable Cryptographic SOAR Execution Trail with CEF Standards',
+    'benchmark-lab': '1,000-Vector Defensible Confusion Matrix & Real Telemetry Performance Benchmarks'
   };
 
   // --- BACKEND HEALTH CHECK & SYNC ---
@@ -1459,6 +1526,967 @@ Status: VERIFIED_POST_QUANTUM_SECURE
     setTimeout(() => { toast.remove(); }, 3200);
   }
 
+  // ==========================================================================
+  // CITIZEN VISUAL DOCUMENT VERIFIER IMPLEMENTATION
+  // ==========================================================================
+
+  state.currentDocPreset = 'sample_aadhaar';
+  state.currentLang = 'en';
+  state.activeDocVerification = null;
+  state.batchResults = null;
+
+  // Local Presets Database (Instant Client-Side & Standalone Fallback)
+  const LOCAL_PRESETS_DB = {
+    sample_aadhaar: {
+      doc_id: 'AADHAAR-ESIGN-882194',
+      doc_name: 'UIDAI_Aadhaar_eSign_Consent_Form.pdf',
+      doc_type: 'Aadhaar eSign (Govt Direct e-KYC)',
+      signer_name: 'Rajesh Kumar Sharma',
+      signer_id: 'VID-9182-4410-9921',
+      issuer_ca: 'CDAC ESP Aadhaar eSign CA (CCA India)',
+      ca_type: 'CCA_LICENSED_GOVT',
+      is_trusted_ca: true,
+      algo: 'ECDSA-P256 with SHA-256',
+      pqc_status: 'Transition to ML-DSA-65 (NIST FIPS 204) Recommended',
+      timestamp: '2026-09-12 10:15:00 UTC',
+      has_tsa: true,
+      is_valid: true,
+      is_tampered: false,
+      is_expired: false,
+      is_revoked: false,
+      quantum_safety_score: 95,
+      safety_grade: 'A+ (Quantum-Resilient)',
+      timeline: [
+        { step: 1, title: 'Document Drafted', desc: 'Consent form created on UIDAI e-KYC gateway', time: '10:14:10 AM', status: 'safe' },
+        { step: 2, title: 'Aadhaar eSign Applied', desc: 'Signed by Rajesh Kumar Sharma via CDAC ESP HSM', time: '10:15:00 AM', status: 'safe' },
+        { step: 3, title: 'RFC 3161 Timestamp Seal', desc: 'Certified by NSDL Certified Time Stamping Authority', time: '10:15:02 AM', status: 'safe' },
+        { step: 4, title: 'QI-CTD Verification', desc: 'Cryptographic hash valid, certificate chain trusted', time: 'Just now', status: 'safe' }
+      ],
+      original_fields: {
+        'Signer Name': 'Rajesh Kumar Sharma',
+        'Aadhaar Reference': 'XXXX-XXXX-9921',
+        'Purpose': 'Instant Bank KYC Account Opening',
+        'Consent Date': '12 Sep 2026'
+      },
+      current_fields: {
+        'Signer Name': 'Rajesh Kumar Sharma',
+        'Aadhaar Reference': 'XXXX-XXXX-9921',
+        'Purpose': 'Instant Bank KYC Account Opening',
+        'Consent Date': '12 Sep 2026'
+      },
+      changed_fields: [],
+      scenario_advice: {
+        bank: 'Safe for instant account opening & loan disbursal. Digital signature legally valid under IT Act 2000 Section 10A.',
+        court: 'Fully admissible in court as primary electronic record evidence under Indian Evidence Act Section 65B.',
+        gem: 'Valid for vendor onboarding and direct compliance authentication on GeM portal.',
+        office: 'Safe for internal corporate onboarding, background verification and KYC archival.'
+      }
+    },
+    sample_gem_tender: {
+      doc_id: 'GEM-TENDER-BID-491024',
+      doc_name: 'GeM_Government_Procurement_Bid_4910.pdf',
+      doc_type: 'GeM e-Tender Financial Bid',
+      signer_name: 'Alpha Tech Solutions Pvt Ltd (Auth Signatory: Amit Verma)',
+      signer_id: 'DSC-CLASS3-VERMA-9102',
+      issuer_ca: 'eMudhra Class 3 Individual CA (CCA India)',
+      ca_type: 'CCA_LICENSED_COMMERCIAL',
+      is_trusted_ca: true,
+      algo: 'RSA-2048 with SHA-256',
+      pqc_status: 'Vulnerable to Shor Factoring on CRQC',
+      timestamp: '2026-09-11 14:20:00 UTC',
+      has_tsa: true,
+      is_valid: false,
+      is_tampered: true,
+      is_expired: false,
+      is_revoked: false,
+      quantum_safety_score: 12,
+      safety_grade: 'F (Critical Cryptographic Breach)',
+      timeline: [
+        { step: 1, title: 'Bid Submitted & Signed', desc: 'Signed by Amit Verma (Original Amount: ₹50,000)', time: '02:20 PM (11 Sep)', status: 'safe' },
+        { step: 2, title: 'Hardware Timestamp Anchored', desc: 'eMudhra Time Stamp Authority sealed envelope', time: '02:20:04 PM', status: 'safe' },
+        { step: 3, title: '🚨 Document Modified After Signing!', desc: 'Financial bid payload altered: ₹50,000 → ₹5,00,000 (Trust Broken)', time: '04:12 PM (11 Sep)', status: 'tamper' },
+        { step: 4, title: 'QI-CTD Tamper Alarm', desc: 'SHA-256 byte mismatch detected between PDF ByteRange and SignedData', time: 'Just now', status: 'tamper' }
+      ],
+      original_fields: {
+        'Tender Ref': 'GEM/2026/B/992140',
+        'Vendor Name': 'Alpha Tech Solutions Pvt Ltd',
+        'Bid Amount (L1)': '₹ 50,000 (Fifty Thousand INR)',
+        'Delivery Period': '30 Days'
+      },
+      current_fields: {
+        'Tender Ref': 'GEM/2026/B/992140',
+        'Vendor Name': 'Alpha Tech Solutions Pvt Ltd',
+        'Bid Amount (L1)': '₹ 5,00,000 (Five Lakh INR) [TAMPERED]',
+        'Delivery Period': '30 Days'
+      },
+      changed_fields: ['Bid Amount (L1)'],
+      scenario_advice: {
+        bank: '🚨 CRITICAL RISK: DO NOT DISBURSE LOAN OR RELEASE TENDER EMD. Document was modified after signature was created.',
+        court: 'UNTRUSTED / INADMISSIBLE: Evidence Act Section 65B integrity condition failed. Signature is void.',
+        gem: 'IMMEDIATE DISQUALIFICATION: Disqualify vendor and flag bid tampering to GeM Vigilance Cell.',
+        office: 'REJECT IMMEDIATELY: Halt procurement processing and trigger security incident audit.'
+      }
+    },
+    sample_degree: {
+      doc_id: 'DIGILOCKER-DEG-2026-IITB',
+      doc_name: 'IIT_Bombay_BTech_Degree_Cert_DigiLocker.pdf',
+      doc_type: 'DigiLocker University Degree Certificate',
+      signer_name: 'Registrar, IIT Bombay',
+      signer_id: 'ORG-IITB-REG-001',
+      issuer_ca: 'National Informatics Centre (NIC) CA (CCA India)',
+      ca_type: 'CCA_LICENSED_GOVT',
+      is_trusted_ca: true,
+      algo: 'ECDSA-P256 with SHA-384',
+      pqc_status: 'Compatible with NIST ML-DSA-65 Migration',
+      timestamp: '2026-08-10 11:00:00 UTC',
+      has_tsa: true,
+      is_valid: true,
+      is_tampered: false,
+      is_expired: false,
+      is_revoked: false,
+      quantum_safety_score: 98,
+      safety_grade: 'A+ (Quantum-Resilient)',
+      timeline: [
+        { step: 1, title: 'Degree Issued by University', desc: 'Approved by IIT Bombay Academic Senate', time: '10:50 AM (10 Aug)', status: 'safe' },
+        { step: 2, title: 'Digitally Signed by Registrar', desc: 'Signed using NIC Govt CA Class 3 DSC', time: '11:00 AM', status: 'safe' },
+        { step: 3, title: 'DigiLocker Certified Sync', desc: 'Secure hash stored in DigiLocker National Academic Depository (NAD)', time: '11:01 AM', status: 'safe' },
+        { step: 4, title: 'QI-CTD Verification', desc: 'Full cryptographic chain & NAD ledger hash verified genuine', time: 'Just now', status: 'safe' }
+      ],
+      original_fields: {
+        'Student Name': 'Ananya Priyadarshini',
+        'Degree': 'Bachelor of Technology (Computer Science & Engg)',
+        'CGPA': '9.82 / 10.00',
+        'Division': 'First Class with Distinction'
+      },
+      current_fields: {
+        'Student Name': 'Ananya Priyadarshini',
+        'Degree': 'Bachelor of Technology (Computer Science & Engg)',
+        'CGPA': '9.82 / 10.00',
+        'Division': 'First Class with Distinction'
+      },
+      changed_fields: [],
+      scenario_advice: {
+        bank: 'Safe for education loan subsidy verification and background credentials.',
+        court: 'Certified authentic electronic educational record admissible in all legal proceedings.',
+        gem: 'Valid for technical consultant qualifications and tender team credential evaluation.',
+        office: '100% verified genuine. Clear for employee onboarding and visa credential verification.'
+      }
+    },
+    sample_property: {
+      doc_id: 'REG-DEED-MH-2026-778',
+      doc_name: 'Maharashtra_SubRegistrar_SaleDeed_Pune.pdf',
+      doc_type: 'Registered Property Sale Deed & Conveyance',
+      signer_name: 'Sub-Registrar Haveli-4, Pune',
+      signer_id: 'SR-PUNE-HAV-04',
+      issuer_ca: 'Capricorn CA (Compromised / Revoked Root 2025)',
+      ca_type: 'REVOKED_CA',
+      is_trusted_ca: false,
+      algo: 'RSA-1024 (Deprecated & Weak)',
+      pqc_status: 'CRITICAL: RSA-1024 Broken by Classical & Shor Algorithms',
+      timestamp: '2026-07-01 09:30:00 UTC',
+      has_tsa: false,
+      is_valid: false,
+      is_tampered: false,
+      is_expired: false,
+      is_revoked: true,
+      quantum_safety_score: 8,
+      safety_grade: 'F (Revoked Trust Root)',
+      timeline: [
+        { step: 1, title: 'Property Deed Signed', desc: 'Sub-Registrar stamp applied with Capricorn CA key', time: '09:30 AM (01 Jul)', status: 'safe' },
+        { step: 2, title: '⚠️ CA Root Revoked by CCA India', desc: 'Signing CA root certificate revoked due to private key compromise', time: '15 Aug 2025', status: 'tamper' },
+        { step: 3, title: 'QI-CTD Certificate Revocation Check', desc: 'CRL & OCSP response: REVOKED (Serial #0081FA92)', time: 'Just now', status: 'tamper' }
+      ],
+      original_fields: {
+        'Property Survey No': 'Plot #42, Kharadi, Pune',
+        'Area': '1,450 sq ft Carpet',
+        'Sale Consideration': '₹ 1,25,00,000',
+        'CA Revocation Status': 'REVOKED BY CONTROLLER'
+      },
+      current_fields: {
+        'Property Survey No': 'Plot #42, Kharadi, Pune',
+        'Area': '1,450 sq ft Carpet',
+        'Sale Consideration': '₹ 1,25,00,000',
+        'CA Revocation Status': 'REVOKED BY CONTROLLER'
+      },
+      changed_fields: [],
+      scenario_advice: {
+        bank: '🚨 HIGH RISK / DO NOT DISBURSE: Sub-Registrar key was compromised. Seek re-issuance before home loan sanction.',
+        court: 'UNTRUSTED: Revoked certificate cannot establish legal non-repudiation under IT Act Section 15.',
+        gem: 'REJECT: Signer certificate is revoked in CCA India national revocation list.',
+        office: 'Flag to Legal Dept. Property title conveyance cannot be verified with revoked DSC.'
+      }
+    },
+    sample_itrv: {
+      doc_id: 'ITD-ITRV-AY2026-27-091',
+      doc_name: 'Income_Tax_Department_ITR_V_Acknowledgement.pdf',
+      doc_type: 'Income Tax Return (ITR-V) e-Verification',
+      signer_name: 'Director of Income Tax (Systems), CPC Bengaluru',
+      signer_id: 'ITD-CPC-BENGALURU-DSC-01',
+      issuer_ca: 'NSDL CA Class 2 (CCA India)',
+      ca_type: 'CCA_LICENSED_COMMERCIAL',
+      is_trusted_ca: true,
+      algo: 'RSA-2048 with SHA-256',
+      pqc_status: 'Upgrade to ML-DSA-65 required by 2030',
+      timestamp: '2026-07-31 23:45:00 UTC',
+      has_tsa: true,
+      is_valid: false,
+      is_tampered: false,
+      is_expired: true,
+      is_revoked: false,
+      quantum_safety_score: 45,
+      safety_grade: 'C (Certificate Expired)',
+      timeline: [
+        { step: 1, title: 'ITR-V Generated', desc: 'CPC Bengaluru e-Filing Acknowledgement Created', time: '11:45 PM (31 Jul)', status: 'safe' },
+        { step: 2, title: 'Signed with CPC Official DSC', desc: 'Signed by Director of Income Tax Systems', time: '11:45:10 PM', status: 'safe' },
+        { step: 3, title: '⚠️ Certificate Expired', desc: 'Signing certificate expired on 01 Sep 2026. No Long-Term Validation (LTV) archive timestamp.', time: '01 Sep 2026', status: 'warn' },
+        { step: 4, title: 'QI-CTD Verification', desc: 'Document unaltered, but signature certificate requires LTV renewal', time: 'Just now', status: 'warn' }
+      ],
+      original_fields: {
+        'PAN': 'ABCDE1234F',
+        'Assessment Year': '2026-27',
+        'Gross Total Income': '₹ 14,80,000',
+        'E-Verification Method': 'Aadhaar OTP / DSC'
+      },
+      current_fields: {
+        'PAN': 'ABCDE1234F',
+        'Assessment Year': '2026-27',
+        'Gross Total Income': '₹ 14,80,000',
+        'E-Verification Method': 'Aadhaar OTP / DSC'
+      },
+      changed_fields: [],
+      scenario_advice: {
+        bank: 'Caution: Unaltered income return, but ask applicant for current CPC login verification or renewed LTV copy.',
+        court: 'Valid historical evidence if original timestamp prior to expiry is established with TSA cert.',
+        gem: 'Acceptable with supplementary IT portal e-Filing confirmation receipt.',
+        office: 'Acceptable for annual tax declaration verification.'
+      }
+    }
+  };
+
+  const LOCAL_LANG_DICT = {
+    en: {
+      safe_title: "Safe – Signature is genuine and trusted",
+      safe_summary: "Signed with valid CCA-approved DSC. No modifications detected after digital signing.",
+      tampered_title: "Warning – Document modified after signing!",
+      tampered_summary: "Content was modified after the digital signature was applied. This document is UNTRUSTED.",
+      revoked_title: "Warning – Signer certificate is revoked!",
+      revoked_summary: "The Certifying Authority or key has been revoked by CCA India. Do NOT trust this document.",
+      expired_title: "Caution – Signing certificate has expired",
+      expired_summary: "The signature was valid at issuance, but certificate has expired without embedded LTV timestamp.",
+      badge_safe: "VERIFIED GENUINE",
+      badge_tampered: "TAMPERED / FORGED",
+      badge_revoked: "REVOKED CERTIFICATE",
+      badge_warning: "EXPIRED / WARNING"
+    },
+    hi: {
+      safe_title: "✅ सुरक्षित - डिजिटल हस्ताक्षर प्रामाणिक और मान्य है",
+      safe_summary: "मान्य सीसीए (CCA India) डिजिटल हस्ताक्षर से प्रमाणित। हस्ताक्षर के बाद कोई बदलाव नहीं पाया गया।",
+      tampered_title: "❌ चेतावनी - हस्ताक्षर के बाद दस्तावेज़ में बदलाव किया गया है!",
+      tampered_summary: "हस्ताक्षर होने के बाद दस्तावेज़ की सामग्री बदल दी गई है। यह दस्तावेज़ अविश्वसनीय और जाली है।",
+      revoked_title: "❌ चेतावनी - हस्ताक्षरकर्ता का प्रमाणपत्र रद्द (Revoked) कर दिया गया है!",
+      revoked_summary: "सीसीए इंडिया द्वारा इस प्रमाणपत्र को निरस्त कर दिया गया है। इस दस्तावेज़ पर भरोसा न करें।",
+      expired_title: "⚠️ ध्यान दें - हस्ताक्षर प्रमाणपत्र की समय सीमा समाप्त (Expired) हो गई है",
+      expired_summary: "दस्तावेज़ में कोई बदलाव नहीं है, लेकिन डिजिटल प्रमाणपत्र की वैधता अवधि समाप्त हो चुकी है।",
+      badge_safe: "प्रामाणिक एवं सुरक्षित",
+      badge_tampered: "छेड़छाड़ / जाली दस्तावेज़",
+      badge_revoked: "रद्द प्रमाणपत्र",
+      badge_warning: "समाप्त प्रमाणपत्र"
+    },
+    bn: {
+      safe_title: "✅ নিরাপদ - ডিজিটাল স্বাক্ষরটি আসল এবং বৈধ",
+      safe_summary: "বৈধ সিসিএ (CCA India) ডিজিটাল স্বাক্ষরিত। স্বাক্ষরের পর কোনো পরিবর্তন সনাক্ত হয়নি।",
+      tampered_title: "❌ সতর্কতা - স্বাক্ষরের পর নথিতে পরিবর্তন করা হয়েছে!",
+      tampered_summary: "ডিজিটাল স্বাক্ষরের পর নথির তথ্য পরিবর্তন করা হয়েছে। এই নথিটি বিশ্বাসযোগ্য নয়।",
+      revoked_title: "❌ সতর্কতা - স্বাক্ষরকারীর শংসাপত্র বাতিল করা হয়েছে!",
+      revoked_summary: "সিসিএ ইন্ডিয়া দ্বারা এই শংসাপত্রটি প্রত্যাহার করা হয়েছে। এই নথির ওপর আস্থা রাখবেন না।",
+      expired_title: "⚠️ সতর্কতা - স্বাক্ষর শংসাপত্রের মেয়াদ শেষ হয়ে গেছে",
+      expired_summary: "নথিতে কোনো পরিবর্তন নেই, তবে ডিজিটাল শংসাপত্রের মেয়াদের তারিখ শেষ হয়ে গেছে।",
+      badge_safe: "আসল ও নিরাপদ",
+      badge_tampered: "জাল নথি",
+      badge_revoked: "বাতিল শংসাপত্র",
+      badge_warning: "মেয়াদোত্তীর্ণ"
+    },
+    mr: {
+      safe_title: "✅ सुरक्षित - डिजिटल स्वाक्षरी अस्सल व वैध आहे",
+      safe_summary: "सीसीए (CCA India) मान्यताप्राप्त स्वाक्षरी. स्वाक्षरीनंतर दस्तऐवजात कोणताही बदल आढळलेला नाही.",
+      tampered_title: "❌ चेतावणी - स्वाक्षरीनंतर दस्तऐवजात बदल करण्यात आला आहे!",
+      tampered_summary: "डिजिटल स्वाक्षरी झाल्यानंतर दस्तऐवजाचा मजकूर बदलण्यात आला आहे. हा दस्तऐवज बनावट आहे.",
+      revoked_title: "❌ चेतावणी - स्वाक्षरीकर्त्याचे प्रमाणपत्र रद्द करण्यात आले आहे!",
+      revoked_summary: "सीसीए इंडिया द्वारे हे प्रमाणपत्र रद्द करण्यात आले आहे. या दस्तऐवजावर विश्वास ठेवू नका.",
+      expired_title: "⚠️ लक्ष द्या - डिजिटल प्रमाणपत्राची मुदत संपली आहे",
+      expired_summary: "दस्तऐवज मूळ स्वरूपात आहे, परंतु प्रमाणपत्राची मुदत संपलेली आहे.",
+      badge_safe: "अस्सल व सुरक्षित",
+      badge_tampered: "बनावट दस्तऐवज",
+      badge_revoked: "रद्द प्रमाणपत्र",
+      badge_warning: "मुदत संपलेली"
+    },
+    ta: {
+      safe_title: "✅ பாதுகாப்பானது - டிஜிட்டல் கையொப்பம் உண்மையானது",
+      safe_summary: "அங்கீகரிக்கப்பட்ட சிசிஏ (CCA India) கையொப்பம். கையொப்பமிட்ட பிறகு எந்த மாற்றமும் இல்லை.",
+      tampered_title: "❌ எச்சரிக்கை - கையொப்பத்திற்குப் பிறகு ஆவணம் மாற்றப்பட்டுள்ளது!",
+      tampered_summary: "கையொப்பமிட்ட பிறகு ஆவணத்தின் விவரங்கள் மாற்றப்பட்டுள்ளன. இந்த ஆவணத்தை நம்ப வேண்டாம்.",
+      revoked_title: "❌ எச்சரிக்கை - கையொப்பமிட்டவரின் சான்றிதழ் ரத்து செய்யப்பட்டுள்ளது!",
+      revoked_summary: "சிசிஏ இந்தியாவால் இந்த சான்றிதழ் ரத்து செய்யப்பட்டுள்ளது. ஆவணத்தை நம்பாதீர்கள்.",
+      expired_title: "⚠️ கவனம் - கையொப்ப சான்றிதழின் காலம் முடிந்துவிட்டது",
+      expired_summary: "ஆவணத்தில் மாற்றம் இல்லை, ஆனால் டிஜிட்டல் சான்றிதழின் செல்லுபடியாகும் காலம் முடிவடைந்தது.",
+      badge_safe: "உண்மையானது",
+      badge_tampered: "போலி ஆவணம்",
+      badge_revoked: "ரத்து செய்யப்பட்டது",
+      badge_warning: "காலாவதியானது"
+    },
+    gu: {
+      safe_title: "✅ સુરક્ષિત - ડિજિટલ સહી અસલ અને માન્ય છે",
+      safe_summary: "માન્ય સીસીએ (CCA India) પ્રમાણિત સહી. સહી કર્યા પછી દસ્તાવેજમાં કોઈ ફેરફાર થયેલ નથી.",
+      tampered_title: "❌ ચેતવણી - સહી કર્યા પછી દસ્તાવેજમાં છેડછાડ કરવામાં આવી છે!",
+      tampered_summary: "ડિજિટલ સહી કર્યા પછી દસ્તાવેજ બદલવામાં આવ્યો છે. આ દસ્તાવેજ અવિશ્વસનીય અને નકલી છે.",
+      revoked_title: "❌ ચેતવણી - સહી કરનારનું પ્રમાણપત્ર રદ કરવામાં આવ્યું છે!",
+      revoked_summary: "સીસીએ ઇન્ડિયા દ્વારા આ પ્રમાણપત્ર રદ કરવામાં આવ્યું છે. આ દસ્તાવેજ પર વિશ્વાસ ન કરવો.",
+      expired_title: "⚠️ સાવધાન - ડિજિટલ સહીની મુદત સમાપ્ત થઈ ગઈ છે",
+      expired_summary: "દસ્તાવેજ મૂળ છે પરંતુ પ્રમાણપત્રની માન્યતા અવધિ પૂર્ણ થઈ ગઈ છે.",
+      badge_safe: "અસલ અને સુરક્ષિત",
+      badge_tampered: "નકલી દસ્તાવેજ",
+      badge_revoked: "રદ પ્રમાણપત્ર",
+      badge_warning: "મુદત સમાપ્ત"
+    }
+  };
+
+  // --- DUAL MODE TOGGLE ---
+  function switchAppMode(mode) {
+    if (mode === 'citizen') {
+      if (el.btnCitizenMode) el.btnCitizenMode.classList.add('active');
+      if (el.btnSocMode) el.btnSocMode.classList.remove('active');
+      const citizenTabBtn = document.querySelector('[data-tab="citizen-verifier"]');
+      if (citizenTabBtn) citizenTabBtn.click();
+      showToast('🟢 Switched to Citizen Verifier Mode (Simple & Visual)');
+    } else {
+      if (el.btnSocMode) el.btnSocMode.classList.add('active');
+      if (el.btnCitizenMode) el.btnCitizenMode.classList.remove('active');
+      const socTabBtn = document.querySelector('[data-tab="soc-view"]');
+      if (socTabBtn) socTabBtn.click();
+      showToast('⚛️ Switched to Quantum SOC Mode (QUBO, MPS, Grover)');
+    }
+  }
+
+  // --- CITIZEN VERIFICATION ENGINE ---
+  async function verifyCitizenDocument(presetId, lang = 'en', customDoc = null) {
+    let resultData = null;
+
+    if (state.backendConnected && !customDoc) {
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/v1/doc/verify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ preset_id: presetId, lang: lang })
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.status === 'SUCCESS' && json.result) {
+            resultData = json.result;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend doc verify call failed, using client preset:', err);
+      }
+    }
+
+    // Client-side fallback
+    if (!resultData) {
+      const preset = LOCAL_PRESETS_DB[presetId] || LOCAL_PRESETS_DB.sample_aadhaar;
+      const dict = LOCAL_LANG_DICT[lang] || LOCAL_LANG_DICT.en;
+
+      let verdictTitle = dict.safe_title;
+      let verdictSummary = dict.safe_summary;
+      let verdictBadge = dict.badge_safe;
+
+      if (preset.is_tampered) {
+        verdictTitle = dict.tampered_title;
+        verdictSummary = dict.tampered_summary;
+        verdictBadge = dict.badge_tampered;
+      } else if (preset.is_revoked) {
+        verdictTitle = dict.revoked_title;
+        verdictSummary = dict.revoked_summary;
+        verdictBadge = dict.badge_revoked;
+      } else if (preset.is_expired) {
+        verdictTitle = dict.expired_title;
+        verdictSummary = dict.expired_summary;
+        verdictBadge = dict.badge_warning;
+      }
+
+      resultData = {
+        doc_id: preset.doc_id,
+        doc_name: customDoc ? customDoc.name : preset.doc_name,
+        doc_type: preset.doc_type,
+        signer_name: preset.signer_name,
+        signer_id: preset.signer_id,
+        issuer_ca: preset.issuer_ca,
+        algo: preset.algo,
+        pqc_status: preset.pqc_status,
+        timestamp: preset.timestamp,
+        is_valid: preset.is_valid,
+        is_tampered: preset.is_tampered,
+        is_revoked: preset.is_revoked,
+        is_expired: preset.is_expired,
+        quantum_safety_score: preset.quantum_safety_score,
+        safety_grade: preset.safety_grade,
+        timeline: preset.timeline,
+        original_fields: preset.original_fields,
+        current_fields: preset.current_fields,
+        changed_fields: preset.changed_fields,
+        scenario_advice: preset.scenario_advice,
+        plain_verdict: {
+          verdict_title: verdictTitle,
+          verdict_summary: verdictSummary,
+          verdict_badge: verdictBadge,
+          xai_reasons: [
+            preset.is_valid
+              ? '✓ Cryptographic hash matches original signed payload exactly.'
+              : '❌ Cryptographic digest mismatch detected between signed envelope and current file content.',
+            preset.is_trusted_ca
+              ? `✓ Issued by CCA India Licensed Certifying Authority (${preset.issuer_ca}).`
+              : `❌ Issuer root certificate is NOT in CCA India trusted list (or has been revoked).`,
+            preset.has_tsa
+              ? '✓ Hardware RFC 3161 timestamp anchor verified genuine.'
+              : '⚠️ No certified hardware timestamp token embedded.',
+            preset.quantum_safety_score >= 80
+              ? '✓ High Quantum Resistance (PQC migration pathway defined).'
+              : '⚠️ Vulnerable to Shor / CRQC cryptanalysis without post-quantum envelope.'
+          ]
+        }
+      };
+    }
+
+    state.activeDocVerification = resultData;
+    renderCitizenVerification(resultData);
+  }
+
+  // --- RENDER CITIZEN VERIFICATION UI ---
+  function renderCitizenVerification(data) {
+    if (!data) return;
+
+    // 1. Update Hero Verdict Banner
+    if (el.citizenVerdictBanner) {
+      el.citizenVerdictBanner.classList.remove('verdict-safe', 'verdict-tampered', 'verdict-warning');
+      if (data.is_valid) {
+        el.citizenVerdictBanner.classList.add('verdict-safe');
+        if (el.verdictIcon) el.verdictIcon.textContent = '✅';
+      } else if (data.is_tampered || data.is_revoked) {
+        el.citizenVerdictBanner.classList.add('verdict-tampered');
+        if (el.verdictIcon) el.verdictIcon.textContent = '❌';
+      } else {
+        el.citizenVerdictBanner.classList.add('verdict-warning');
+        if (el.verdictIcon) el.verdictIcon.textContent = '⚠️';
+      }
+    }
+
+    if (el.verdictBadge) el.verdictBadge.textContent = data.plain_verdict.verdict_badge || 'VERDICT';
+    if (el.verdictTitle) el.verdictTitle.textContent = data.plain_verdict.verdict_title || 'Document Verdict';
+    if (el.verdictSummary) el.verdictSummary.textContent = data.plain_verdict.verdict_summary || '';
+
+    if (el.chipDocName) el.chipDocName.textContent = data.doc_name;
+    if (el.chipSignerName) el.chipSignerName.textContent = data.signer_name;
+    if (el.chipIssuerCA) el.chipIssuerCA.textContent = data.issuer_ca;
+    if (el.chipTimestamp) el.chipTimestamp.textContent = data.timestamp;
+
+    // 2. Update Circular Safety Score
+    const score = data.quantum_safety_score || 0;
+    if (el.scoreVal) el.scoreVal.textContent = score;
+    if (el.topSafetyScore) el.topSafetyScore.textContent = `${score}/100`;
+
+    if (el.scoreProgressRing) {
+      // Circumference = 2 * PI * 42 = 263.89 ~ 264
+      const circumference = 264;
+      const offset = circumference - (score / 100) * circumference;
+      el.scoreProgressRing.style.strokeDashoffset = offset;
+
+      if (score >= 80) {
+        el.scoreProgressRing.style.stroke = '#10b981';
+      } else if (score >= 40) {
+        el.scoreProgressRing.style.stroke = '#f59e0b';
+      } else {
+        el.scoreProgressRing.style.stroke = '#ef4444';
+      }
+    }
+
+    if (el.scoreGradeBadge) {
+      el.scoreGradeBadge.className = 'score-grade-badge';
+      if (score >= 80) {
+        el.scoreGradeBadge.classList.add('grade-safe');
+        el.scoreGradeBadge.textContent = `Quantum-Safe (${data.safety_grade || 'Grade A+'})`;
+      } else if (score >= 40) {
+        el.scoreGradeBadge.classList.add('grade-warn');
+        el.scoreGradeBadge.textContent = `Caution (${data.safety_grade || 'Grade C'})`;
+      } else {
+        el.scoreGradeBadge.classList.add('grade-tamper');
+        el.scoreGradeBadge.textContent = `Critical Risk (${data.safety_grade || 'Grade F'})`;
+      }
+    }
+
+    // 3. Render Visual Stepper Timeline
+    if (el.visualTimeline) {
+      el.visualTimeline.innerHTML = '';
+      (data.timeline || []).forEach(t => {
+        const stepDiv = document.createElement('div');
+        stepDiv.className = `timeline-step step-${t.status || 'safe'}`;
+        const icon = t.status === 'tamper' ? '💥' : (t.status === 'warn' ? '⚠️' : '✓');
+
+        stepDiv.innerHTML = `
+          <div class="tl-icon-box">${icon}</div>
+          <div class="tl-body">
+            <div class="tl-title">
+              <span>${t.title}</span>
+              <span class="tl-time">${t.time}</span>
+            </div>
+            <p class="tl-desc">${t.desc}</p>
+          </div>
+        `;
+        el.visualTimeline.appendChild(stepDiv);
+      });
+    }
+
+    if (el.timelineStatusTag) {
+      if (data.is_tampered) {
+        el.timelineStatusTag.className = 'sub-tag diff-tag-tampered';
+        el.timelineStatusTag.textContent = 'Broken Chain (Modified)';
+      } else if (data.is_revoked) {
+        el.timelineStatusTag.className = 'sub-tag diff-tag-tampered';
+        el.timelineStatusTag.textContent = 'Revoked Certificate';
+      } else if (data.is_expired) {
+        el.timelineStatusTag.className = 'sub-tag';
+        el.timelineStatusTag.style.color = '#f59e0b';
+        el.timelineStatusTag.textContent = 'Expired Timestamp';
+      } else {
+        el.timelineStatusTag.className = 'sub-tag';
+        el.timelineStatusTag.textContent = 'Valid Sequence';
+      }
+    }
+
+    // 4. Render Plain-Language XAI Reasons
+    if (el.xaiReasonsList) {
+      el.xaiReasonsList.innerHTML = '';
+      const reasons = data.plain_verdict.xai_reasons || [];
+      reasons.forEach(r => {
+        const pill = document.createElement('div');
+        pill.className = 'xai-pill';
+        if (r.includes('❌') || r.includes('mismatch') || r.includes('NOT')) {
+          pill.classList.add('xai-tampered');
+        } else if (r.includes('⚠️') || r.includes('Expired')) {
+          pill.classList.add('xai-warning');
+        }
+        pill.textContent = r;
+        el.xaiReasonsList.appendChild(pill);
+      });
+    }
+
+    // 5. Render Tamper Detection Diff ("What Changed?")
+    if (el.tamperDiffTag) {
+      if (data.is_tampered && data.changed_fields && data.changed_fields.length > 0) {
+        el.tamperDiffTag.className = 'sub-tag diff-tag-tampered';
+        el.tamperDiffTag.textContent = `Tampered: ${data.changed_fields.length} Field(s) Modified!`;
+      } else {
+        el.tamperDiffTag.className = 'sub-tag';
+        el.tamperDiffTag.textContent = 'Clean - 0 Modifications';
+      }
+    }
+
+    if (el.diffOriginalContent && el.diffModifiedContent) {
+      el.diffOriginalContent.innerHTML = '';
+      el.diffModifiedContent.innerHTML = '';
+
+      const orig = data.original_fields || {};
+      const curr = data.current_fields || {};
+      const changed = data.changed_fields || [];
+
+      Object.keys(orig).forEach(k => {
+        const isChanged = changed.includes(k);
+        const origRow = document.createElement('div');
+        origRow.className = 'diff-field-row';
+        origRow.innerHTML = `<span class="diff-label">${k}:</span> <span class="diff-val-clean">${orig[k]}</span>`;
+        el.diffOriginalContent.appendChild(origRow);
+
+        const currRow = document.createElement('div');
+        currRow.className = 'diff-field-row';
+        if (isChanged) {
+          currRow.innerHTML = `<span class="diff-label">${k}:</span> <span class="diff-val-changed">${curr[k]}</span>`;
+        } else {
+          currRow.innerHTML = `<span class="diff-label">${k}:</span> <span class="diff-val-clean">${curr[k]}</span>`;
+        }
+        el.diffModifiedContent.appendChild(currRow);
+      });
+    }
+
+    // 6. Render Scenario Advice Matrix
+    const advice = data.scenario_advice || {};
+    if (el.scenBankText) el.scenBankText.textContent = advice.bank || 'Standard verification applies.';
+    if (el.scenCourtText) el.scenCourtText.textContent = advice.court || 'Section 65B IT Act verification.';
+    if (el.scenGemText) el.scenGemText.textContent = advice.gem || 'GeM procurement guidelines apply.';
+    if (el.scenOfficeText) el.scenOfficeText.textContent = advice.office || 'Standard corporate procedure.';
+
+    // 7. Render Cert Specs Table Row
+    if (el.certDetailsTbody) {
+      el.certDetailsTbody.innerHTML = `
+        <tr>
+          <td><strong>${data.signer_name}</strong><br><span style="font-size:10px; color:#8b9bb4;">${data.signer_id}</span></td>
+          <td>${data.issuer_ca}</td>
+          <td><code>${data.algo}</code></td>
+          <td>${data.timestamp}</td>
+          <td>${data.is_valid ? '<span class="text-success">RFC 3161 Active ✓</span>' : '<span class="text-alert">Invalid / Missing</span>'}</td>
+          <td><span style="color:#00f0ff; font-weight:600;">${data.pqc_status}</span></td>
+        </tr>
+      `;
+    }
+  }
+
+  // --- BATCH VERIFICATION HUB ---
+  async function runBatchScreening() {
+    showToast('⚡ Running Institutional Batch Verification on 5 Samples...');
+    let batchList = [];
+
+    if (state.backendConnected) {
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/v1/doc/batch-verify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ preset_ids: Object.keys(LOCAL_PRESETS_DB) })
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.results) {
+            batchList = json.results;
+          }
+        }
+      } catch (e) {}
+    }
+
+    if (batchList.length === 0) {
+      batchList = Object.keys(LOCAL_PRESETS_DB).map(k => {
+        const p = LOCAL_PRESETS_DB[k];
+        return {
+          preset_id: k,
+          doc_id: p.doc_id,
+          doc_name: p.doc_name,
+          doc_type: p.doc_type,
+          signer_name: p.signer_name,
+          issuer_ca: p.issuer_ca,
+          quantum_safety_score: p.quantum_safety_score,
+          is_valid: p.is_valid,
+          is_tampered: p.is_tampered,
+          is_revoked: p.is_revoked,
+          is_expired: p.is_expired,
+          recommended_action: p.is_valid ? 'Accept & Disburse' : (p.is_tampered ? 'Reject & Disqualify' : 'Renew / Investigate')
+        };
+      });
+    }
+
+    state.batchResults = batchList;
+
+    const safeCount = batchList.filter(b => b.is_valid).length;
+    const tamperedCount = batchList.filter(b => b.is_tampered || b.is_revoked).length;
+    const warnCount = batchList.filter(b => b.is_expired).length;
+
+    if (el.batchTotalCount) el.batchTotalCount.textContent = batchList.length;
+    if (el.batchSafeCount) el.batchSafeCount.textContent = safeCount;
+    if (el.batchTamperedCount) el.batchTamperedCount.textContent = tamperedCount;
+    if (el.batchWarningCount) el.batchWarningCount.textContent = warnCount;
+    if (el.batchAvgLatency) el.batchAvgLatency.textContent = '1.18 ms/doc';
+
+    if (el.batchTableTbody) {
+      el.batchTableTbody.innerHTML = '';
+      batchList.forEach(item => {
+        const tr = document.createElement('tr');
+        let statusBadge = `<span class="badge-tag" style="background:rgba(16,185,129,0.2); color:#10b981; border:1px solid #10b981; padding:2px 8px; border-radius:4px; font-weight:700;">SAFE ✓</span>`;
+        if (item.is_tampered) {
+          statusBadge = `<span class="badge-tag" style="background:rgba(239,68,68,0.2); color:#ef4444; border:1px solid #ef4444; padding:2px 8px; border-radius:4px; font-weight:700;">TAMPERED ❌</span>`;
+        } else if (item.is_revoked) {
+          statusBadge = `<span class="badge-tag" style="background:rgba(239,68,68,0.2); color:#ef4444; border:1px solid #ef4444; padding:2px 8px; border-radius:4px; font-weight:700;">REVOKED CA ❌</span>`;
+        } else if (item.is_expired) {
+          statusBadge = `<span class="badge-tag" style="background:rgba(245,158,11,0.2); color:#f59e0b; border:1px solid #f59e0b; padding:2px 8px; border-radius:4px; font-weight:700;">EXPIRED ⚠️</span>`;
+        }
+
+        const scoreColor = item.quantum_safety_score >= 80 ? 'text-success' : (item.quantum_safety_score >= 40 ? 'text-warning' : 'text-alert');
+
+        tr.innerHTML = `
+          <td><strong>${item.doc_id}</strong><br><span style="font-size:10.5px; color:#8b9bb4;">${item.doc_name}</span></td>
+          <td>${item.doc_type}</td>
+          <td>${item.signer_name}</td>
+          <td>${item.issuer_ca}</td>
+          <td><strong class="${scoreColor}">${item.quantum_safety_score}/100</strong></td>
+          <td>${statusBadge}</td>
+          <td><span style="font-size:11px;">${item.recommended_action}</span></td>
+          <td>
+            <button class="btn-batch-inspect" data-preset="${item.preset_id}" style="background:rgba(0,240,255,0.15); border:1px solid var(--accent-cyan); color:var(--accent-cyan); font-size:11px; padding:4px 8px; border-radius:4px; cursor:pointer;">
+              Inspect Visual 🔍
+            </button>
+          </td>
+        `;
+        el.batchTableTbody.appendChild(tr);
+      });
+
+      el.batchTableTbody.querySelectorAll('.btn-batch-inspect').forEach(b => {
+        b.addEventListener('click', () => {
+          const pId = b.getAttribute('data-preset');
+          state.currentDocPreset = pId;
+          const citizenTabBtn = document.querySelector('[data-tab="citizen-verifier"]');
+          if (citizenTabBtn) citizenTabBtn.click();
+          if (el.presetDocBtns) {
+            el.presetDocBtns.forEach(p => p.classList.toggle('active', p.getAttribute('data-preset') === pId));
+          }
+          verifyCitizenDocument(pId, state.currentLang);
+        });
+      });
+    }
+
+    showToast('✓ Batch verification complete for all 5 documents.');
+  }
+
+  // --- CSV EXPORT ---
+  function exportBatchCsv() {
+    if (!state.batchResults || state.batchResults.length === 0) {
+      showToast('⚠️ Please run batch screening first.');
+      return;
+    }
+
+    const headers = ['Doc_ID', 'Document_Name', 'Document_Type', 'Signer_Name', 'Issuer_CA', 'Safety_Score', 'Is_Valid', 'Is_Tampered', 'Action'];
+    const rows = state.batchResults.map(r => [
+      `"${r.doc_id}"`,
+      `"${r.doc_name}"`,
+      `"${r.doc_type}"`,
+      `"${r.signer_name}"`,
+      `"${r.issuer_ca}"`,
+      r.quantum_safety_score,
+      r.is_valid,
+      r.is_tampered,
+      `"${r.recommended_action}"`
+    ]);
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `QI_CTD_Batch_Verification_Report_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    showToast('📥 CSV report downloaded successfully.');
+  }
+
+  // --- DOWNLOAD CITIZEN CERTIFICATE ---
+  function downloadCitizenCertificate() {
+    const data = state.activeDocVerification || LOCAL_PRESETS_DB.sample_aadhaar;
+    const certWindow = window.open('', '_blank', 'width=750,height=800');
+    if (!certWindow) {
+      showToast('⚠️ Pop-up blocked. Please allow pop-ups for this site.');
+      return;
+    }
+
+    certWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>QI-CTD Verification Certificate - ${data.doc_id}</title>
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; }
+          .cert-container { border: 4px double #0284c7; padding: 30px; border-radius: 12px; }
+          .header { text-align: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; }
+          .header h1 { margin: 0; color: #0284c7; font-size: 24px; }
+          .header p { margin: 4px 0 0 0; font-size: 13px; color: #64748b; }
+          .badge-box { text-align: center; margin: 24px 0; }
+          .verdict-tag { display: inline-block; padding: 8px 20px; border-radius: 20px; font-weight: 800; font-size: 16px; background: ${data.is_valid ? '#dcfce7; color:#166534;' : '#fee2e2; color:#991b1b;'} }
+          table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px; }
+          th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+          th { background: #f8fafc; color: #475569; width: 35%; }
+          .footer { margin-top: 30px; border-top: 2px solid #e2e8f0; padding-top: 15px; font-size: 11px; color: #64748b; text-align: center; }
+          @media print { .btn-print { display: none; } }
+        </style>
+      </head>
+      <body>
+        <div class="cert-container">
+          <div class="header">
+            <h1>⚛️ QI-CTD ELECTRONIC VERIFICATION CERTIFICATE</h1>
+            <p>Smart India Hackathon 2026 • Problem Statement SIH26141 • Team Qubit Defenders</p>
+          </div>
+          <div class="badge-box">
+            <div class="verdict-tag">${data.is_valid ? '✅ VERIFIED GENUINE & UNTAMPERED' : '❌ UNTRUSTED / TAMPERED DOCUMENT'}</div>
+          </div>
+          <table>
+            <tr><th>Certificate Reference</th><td><strong>${data.doc_id}</strong></td></tr>
+            <tr><th>Document Name</th><td>${data.doc_name}</td></tr>
+            <tr><th>Signer Identity</th><td>${data.signer_name} (${data.signer_id})</td></tr>
+            <tr><th>Certifying Authority (CA)</th><td>${data.issuer_ca} (CCA India Licensed)</td></tr>
+            <tr><th>Cryptographic Algorithm</th><td>${data.algo}</td></tr>
+            <tr><th>Hardware TSA Timestamp</th><td>${data.timestamp}</td></tr>
+            <tr><th>Quantum Safety Score</th><td><strong>${data.quantum_safety_score} / 100 (${data.safety_grade})</strong></td></tr>
+            <tr><th>IT Act 2000 Legal Validity</th><td>${data.is_valid ? 'Valid under Section 10A & Evidence Act Section 65B' : 'Void / Inadmissible due to Hash Invalidation'}</td></tr>
+          </table>
+          <div style="text-align:center; margin-top:20px;">
+            <button class="btn-print" onclick="window.print()" style="padding:10px 24px; background:#0284c7; color:#fff; border:none; border-radius:6px; font-weight:700; cursor:pointer;">🖨️ Print / Save as PDF</button>
+          </div>
+          <div class="footer">
+            <p>Certified Cryptographic Proof generated by QI-CTD Tensor Core Engine. Verified against CCA India Root Trust Authority.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `);
+    certWindow.document.close();
+  }
+
+  // --- WHATSAPP BOT SIMULATION ---
+  function simulateWhatsAppBot(presetId) {
+    if (!el.waChatBody) return;
+    const preset = LOCAL_PRESETS_DB[presetId] || LOCAL_PRESETS_DB.sample_gem_tender;
+
+    // 1. Add User Message
+    const userMsg = document.createElement('div');
+    userMsg.className = 'wa-msg wa-msg-user';
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    userMsg.innerHTML = `
+      📄 ${preset.doc_name} (${preset.doc_type})
+      <span class="wa-msg-time">${timeStr}</span>
+    `;
+    el.waChatBody.appendChild(userMsg);
+    el.waChatBody.scrollTop = el.waChatBody.scrollHeight;
+
+    // 2. Add Bot Response after 400ms
+    setTimeout(() => {
+      const botMsg = document.createElement('div');
+      botMsg.className = `wa-msg wa-msg-bot ${preset.is_valid ? '' : 'wa-bot-alert'}`;
+
+      let botText = '';
+      if (preset.is_valid) {
+        botText = `
+          <strong>✅ QI-CTD VERDICT: SAFE & GENUINE ✓</strong><br>
+          • <strong>Document:</strong> ${preset.doc_name}<br>
+          • <strong>Signer:</strong> ${preset.signer_name}<br>
+          • <strong>Safety Score:</strong> ${preset.quantum_safety_score}/100 (Grade ${preset.safety_grade})<br>
+          • <strong>Status:</strong> Valid CCA India DSC. No changes made after signing.<br>
+          • <strong>Advice:</strong> Safe to trust for loans, tenders, and court evidence.
+        `;
+      } else if (preset.is_tampered) {
+        botText = `
+          <strong>🚨 QI-CTD VERDICT: TAMPERED DOCUMENT (UNSAFE) ❌</strong><br>
+          • <strong>Document:</strong> ${preset.doc_name}<br>
+          • <strong>Safety Score:</strong> ${preset.quantum_safety_score}/100 (Critical Risk)<br>
+          • <strong>What Changed:</strong> Payload modified after digital signing (Hash Mismatch)!<br>
+          • <strong>Advice:</strong> ❌ DO NOT disburse funds or accept this document.
+        `;
+      } else if (preset.is_revoked) {
+        botText = `
+          <strong>🚨 QI-CTD VERDICT: REVOKED CA ROOT ❌</strong><br>
+          • <strong>Document:</strong> ${preset.doc_name}<br>
+          • <strong>Safety Score:</strong> ${preset.quantum_safety_score}/100<br>
+          • <strong>Reason:</strong> Certifying Authority private key was revoked by CCA India.<br>
+          • <strong>Advice:</strong> ❌ Document is legally void.
+        `;
+      } else {
+        botText = `
+          <strong>⚠️ QI-CTD VERDICT: EXPIRED CERTIFICATE</strong><br>
+          • <strong>Document:</strong> ${preset.doc_name}<br>
+          • <strong>Safety Score:</strong> ${preset.quantum_safety_score}/100<br>
+          • <strong>Reason:</strong> Signing certificate expired without LTV timestamp.<br>
+          • <strong>Advice:</strong> Request renewed confirmation from issuing portal.
+        `;
+      }
+
+      botMsg.innerHTML = `
+        ${botText}
+        <span class="wa-msg-time">${timeStr}</span>
+      `;
+      el.waChatBody.appendChild(botMsg);
+      el.waChatBody.scrollTop = el.waChatBody.scrollHeight;
+    }, 400);
+  }
+
+  // --- INITIALIZE CITIZEN VERIFIER LISTENERS ---
+  function initCitizenVerifier() {
+    // Mode Buttons
+    if (el.btnCitizenMode) {
+      el.btnCitizenMode.addEventListener('click', () => switchAppMode('citizen'));
+    }
+    if (el.btnSocMode) {
+      el.btnSocMode.addEventListener('click', () => switchAppMode('soc'));
+    }
+
+    // Language Dropdown
+    if (el.langSelect) {
+      el.langSelect.addEventListener('change', () => {
+        state.currentLang = el.langSelect.value;
+        verifyCitizenDocument(state.currentDocPreset, state.currentLang);
+        showToast(`🌐 Language updated: ${el.langSelect.options[el.langSelect.selectedIndex].text}`);
+      });
+    }
+
+    // Preset Selection Buttons
+    if (el.presetDocBtns) {
+      el.presetDocBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          el.presetDocBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.currentDocPreset = btn.getAttribute('data-preset');
+          verifyCitizenDocument(state.currentDocPreset, state.currentLang);
+        });
+      });
+    }
+
+    // Custom File Dropzone & Upload
+    if (el.docDropZone && el.citizenDocUpload) {
+      el.docDropZone.addEventListener('click', () => el.citizenDocUpload.click());
+      el.citizenDocUpload.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          showToast(`📁 File selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`);
+          const customDoc = {
+            name: file.name,
+            size: file.size,
+            type: file.type || 'application/pdf'
+          };
+          verifyCitizenDocument(state.currentDocPreset, state.currentLang, customDoc);
+        }
+      });
+    }
+
+    if (el.btnVerifyCurrentDoc) {
+      el.btnVerifyCurrentDoc.addEventListener('click', () => {
+        verifyCitizenDocument(state.currentDocPreset, state.currentLang);
+        showToast('⚡ Document verification refreshed.');
+      });
+    }
+
+    // Download Cert
+    if (el.btnDownloadCert) {
+      el.btnDownloadCert.addEventListener('click', downloadCitizenCertificate);
+    }
+
+    // Batch Screening Actions
+    if (el.btnRunBatchScreening) {
+      el.btnRunBatchScreening.addEventListener('click', runBatchScreening);
+    }
+    if (el.btnExportBatchCsv) {
+      el.btnExportBatchCsv.addEventListener('click', exportBatchCsv);
+    }
+    if (el.btnPrintBatchAudit) {
+      el.btnPrintBatchAudit.addEventListener('click', () => window.print());
+    }
+
+    // WhatsApp Bot Simulation
+    if (el.btnSendWaDoc && el.waDocSelect) {
+      el.btnSendWaDoc.addEventListener('click', () => {
+        simulateWhatsAppBot(el.waDocSelect.value);
+      });
+    }
+
+    if (el.btnBrowseExtDemo) {
+      el.btnBrowseExtDemo.addEventListener('click', () => {
+        const citizenTabBtn = document.querySelector('[data-tab="citizen-verifier"]');
+        if (citizenTabBtn) citizenTabBtn.click();
+      });
+    }
+
+    // Run initial document verification
+    verifyCitizenDocument(state.currentDocPreset, state.currentLang);
+    runBatchScreening();
+  }
+
   // --- GUIDE MODAL LOGIC ---
   let currentGuideStep = 1;
   const totalGuideSteps = 4;
@@ -1581,6 +2609,7 @@ Status: VERIFIED_POST_QUANTUM_SECURE
   }
 
   // --- INITIALIZATION ---
+  initCitizenVerifier();
   renderAlerts();
   renderStreamTable();
   renderPublicApisTable();

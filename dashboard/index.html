@@ -32,9 +32,29 @@
 
       <!-- Navigation Section Buttons -->
       <div class="sidebar-section">
-        <div class="sidebar-heading">Navigation Views</div>
+        <div class="sidebar-heading">Citizen & Everyday Tools</div>
         <nav class="sidebar-nav">
-          <button class="nav-item active" data-tab="soc-view">
+          <button class="nav-item active" data-tab="citizen-verifier">
+            <span class="nav-icon">🔍</span>
+            <span class="nav-label">Visual Document Verifier</span>
+            <span class="nav-badge" style="background:#10b981; color:#000;">SIMPLE</span>
+          </button>
+          <button class="nav-item" data-tab="batch-verifier">
+            <span class="nav-icon">📑</span>
+            <span class="nav-label">Batch Verification Hub</span>
+          </button>
+          <button class="nav-item" data-tab="integrations-view">
+            <span class="nav-icon">📱</span>
+            <span class="nav-label">WhatsApp Bot & Add-ons</span>
+            <span class="nav-badge" style="background:#25D366; color:#000;">BOT</span>
+          </button>
+        </nav>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-heading">Quantum SOC & Judge Lab</div>
+        <nav class="sidebar-nav">
+          <button class="nav-item" data-tab="soc-view">
             <span class="nav-icon">🚨</span>
             <span class="nav-label">SOC Live Triage</span>
             <span class="nav-badge" id="sidebarAlertBadge">3</span>
@@ -53,17 +73,17 @@
             <span class="nav-label">CISO Risk & QVS</span>
           </button>
           <button class="nav-item" data-tab="crypto-scanner">
-            <span class="nav-icon">🔍</span>
+            <span class="nav-icon">🔬</span>
             <span class="nav-label">Cert & Key Inspector</span>
-          </button>
-          <button class="nav-item" data-tab="audit-logs">
-            <span class="nav-icon">📜</span>
-            <span class="nav-label">SOAR Audit Trail</span>
           </button>
           <button class="nav-item" data-tab="benchmark-lab">
             <span class="nav-icon">📈</span>
             <span class="nav-label">Live Benchmark Lab</span>
             <span class="nav-badge" style="background:#10b981; color:#000;">1000 EV</span>
+          </button>
+          <button class="nav-item" data-tab="audit-logs">
+            <span class="nav-icon">📜</span>
+            <span class="nav-label">SOAR Audit Trail</span>
           </button>
         </nav>
       </div>
@@ -147,31 +167,51 @@
       <!-- Top Header Stats Bar -->
       <header class="top-navbar">
         <div class="top-title-group">
-          <h2 id="currentTabHeading" class="view-title">SOC Real-Time Threat Center</h2>
-          <span class="view-subtitle">Zero-Key Cryptographic Ingestion & Automated SOAR</span>
+          <h2 id="currentTabHeading" class="view-title">Citizen Visual Document Verifier</h2>
+          <span class="view-subtitle" id="currentTabSubtitle">Simple, Instant & Visual Digital Signature Verification for Everyday Documents</span>
         </div>
 
-        <div class="top-actions-group">
-          <button class="btn-guide-pill" id="btnOpenHowItWorks">💡 How This Works</button>
-          <button class="btn-demo-pill" id="btnLaunchGuidedDemo">▶️ 1-Click Interactive Demo</button>
+        <!-- Mode Switcher & Language Selector -->
+        <div class="top-controls-row">
+          <div class="mode-toggle-group">
+            <button class="btn-mode-pill active" id="btnCitizenMode" title="Simple, visual verification for non-tech users">🟢 Citizen Mode</button>
+            <button class="btn-mode-pill" id="btnSocMode" title="Quantum-Inspired AI algorithms, QUBO, and tensor telemetry">⚛️ Quantum SOC</button>
+          </div>
+
+          <div class="lang-selector-box">
+            <span class="lang-icon">🌐</span>
+            <select id="langSelect" class="lang-dropdown">
+              <option value="en" selected>English</option>
+              <option value="hi">हिन्दी (Hindi)</option>
+              <option value="bn">বাংলা (Bengali)</option>
+              <option value="mr">मराठी (Marathi)</option>
+              <option value="ta">தமிழ் (Tamil)</option>
+              <option value="gu">ગુજરાતી (Gujarati)</option>
+            </select>
+          </div>
+
+          <div class="top-actions-group">
+            <button class="btn-guide-pill" id="btnOpenHowItWorks">💡 Guide</button>
+            <button class="btn-demo-pill" id="btnLaunchGuidedDemo">▶️ Demo</button>
+          </div>
         </div>
 
         <div class="top-kpis">
           <div class="kpi-box">
-            <span class="kpi-label">Mean MTTD</span>
-            <span class="kpi-value text-cyan" id="mttdVal">3.8 ms</span>
+            <span class="kpi-label">Quantum Safety</span>
+            <span class="kpi-value text-success" id="topSafetyScore">92/100</span>
           </div>
           <div class="kpi-box">
-            <span class="kpi-label">Attack Recall</span>
-            <span class="kpi-value text-success" id="recallVal">99.4%</span>
+            <span class="kpi-label">Mean MTTD</span>
+            <span class="kpi-value text-cyan" id="mttdVal">1.28 ms</span>
+          </div>
+          <div class="kpi-box">
+            <span class="kpi-label">Recall Rate</span>
+            <span class="kpi-value text-success" id="recallVal">100.0%</span>
           </div>
           <div class="kpi-box">
             <span class="kpi-label">FP Reduction</span>
-            <span class="kpi-value text-purple" id="fpRedVal">-42.0%</span>
-          </div>
-          <div class="kpi-box">
-            <span class="kpi-label">Public APIs Ingested</span>
-            <span class="kpi-value text-cyan" id="topPublicApisCount">8 Real Feeds</span>
+            <span class="kpi-value text-purple" id="fpRedVal">-100.0%</span>
           </div>
         </div>
       </header>
@@ -179,8 +219,428 @@
       <!-- Main Tab Views Container -->
       <main class="page-content">
 
+        <!-- ==================== TAB 0A: CITIZEN VISUAL DOCUMENT VERIFIER ==================== -->
+        <div class="tab-panel active" id="citizen-verifier">
+
+          <!-- Presets & Upload Header Bar -->
+          <div class="citizen-doc-selector-card">
+            <div class="doc-selector-header">
+              <div class="doc-selector-title">
+                <span class="pulse-dot-green"></span>
+                <h3>Select Sample Indian Document or Upload Your File</h3>
+              </div>
+              <span class="doc-selector-subtitle">Verify digital signatures against Controller of Certifying Authorities (CCA India) root trust</span>
+            </div>
+
+            <div class="doc-presets-grid" id="docPresetsGrid">
+              <button class="btn-preset-doc active" data-preset="sample_aadhaar">
+                <span class="preset-icon">📄</span>
+                <div class="preset-text">
+                  <span class="preset-name">Aadhaar eSign (Govt)</span>
+                  <span class="preset-tag tag-valid">VALID DSC</span>
+                </div>
+              </button>
+              <button class="btn-preset-doc" data-preset="sample_gem_tender">
+                <span class="preset-icon">📑</span>
+                <div class="preset-text">
+                  <span class="preset-name">GeM e-Tender (Bid)</span>
+                  <span class="preset-tag tag-tampered">TAMPERED ₹</span>
+                </div>
+              </button>
+              <button class="btn-preset-doc" data-preset="sample_degree">
+                <span class="preset-icon">🎓</span>
+                <div class="preset-text">
+                  <span class="preset-name">DigiLocker Degree</span>
+                  <span class="preset-tag tag-valid">VALID DSC</span>
+                </div>
+              </button>
+              <button class="btn-preset-doc" data-preset="sample_property">
+                <span class="preset-icon">🏢</span>
+                <div class="preset-text">
+                  <span class="preset-name">Property Deed</span>
+                  <span class="preset-tag tag-tampered">REVOKED CA</span>
+                </div>
+              </button>
+              <button class="btn-preset-doc" data-preset="sample_itrv">
+                <span class="preset-icon">📋</span>
+                <div class="preset-text">
+                  <span class="preset-name">ITR-V Tax Ack</span>
+                  <span class="preset-tag tag-warning">EXPIRED CERT</span>
+                </div>
+              </button>
+            </div>
+
+            <!-- Custom Upload Bar -->
+            <div class="custom-upload-strip">
+              <div class="upload-drop-zone" id="docDropZone">
+                <span class="upload-icon">📤</span>
+                <span class="upload-label">Drag & drop your PDF / XML / P7S signed file here or <strong style="color:var(--color-cyan); cursor:pointer;">Browse Files</strong></span>
+                <input type="file" id="citizenDocUpload" accept=".pdf,.xml,.p7s,.json,.txt" style="display:none;">
+              </div>
+              <div class="upload-action-btns">
+                <button class="btn-verify-now" id="btnVerifyCurrentDoc">
+                  <span>⚡ Verify Document Now</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hero Verdict Banner -->
+          <div class="citizen-verdict-banner verdict-safe" id="citizenVerdictBanner">
+            <div class="verdict-banner-left">
+              <div class="verdict-icon-bubble" id="verdictIcon">✅</div>
+              <div class="verdict-info-text">
+                <div class="verdict-badge" id="verdictBadge">VERIFIED GENUINE</div>
+                <h2 class="verdict-title" id="verdictTitle">Safe – Signature is genuine and trusted</h2>
+                <p class="verdict-summary" id="verdictSummary">Signed with valid CCA-approved CDAC ESP DSC. No modifications detected after signing.</p>
+                <div class="verdict-meta-chips" id="verdictMetaChips">
+                  <span class="chip-item">📄 <strong>Document:</strong> <span id="chipDocName">aadhaar_esign_sample.pdf</span></span>
+                  <span class="chip-item">👤 <strong>Signer:</strong> <span id="chipSignerName">Rajesh Kumar Sharma</span></span>
+                  <span class="chip-item">🏛️ <strong>Authority:</strong> <span id="chipIssuerCA">CDAC ESP Aadhaar eSign</span></span>
+                  <span class="chip-item">⏱️ <strong>Timestamp:</strong> <span id="chipTimestamp">2026-09-12 10:15:00 UTC</span></span>
+                </div>
+              </div>
+            </div>
+            <div class="verdict-banner-right">
+              <!-- Circular Safety Score -->
+              <div class="safety-score-widget">
+                <div class="score-circle-outer">
+                  <svg class="score-svg" viewBox="0 0 100 100">
+                    <circle class="score-bg-ring" cx="50" cy="50" r="42"></circle>
+                    <circle class="score-progress-ring" id="scoreProgressRing" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="13"></circle>
+                  </svg>
+                  <div class="score-number-box">
+                    <span class="score-val" id="scoreVal">95</span>
+                    <span class="score-max">/100</span>
+                  </div>
+                </div>
+                <div class="score-grade-badge grade-safe" id="scoreGradeBadge">Quantum-Safe (Grade A+)</div>
+              </div>
+              <button class="btn-download-cert" id="btnDownloadCert">
+                <span>🖨️ Download Certificate</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2-Column Core Analysis Grid -->
+          <div class="citizen-analysis-grid">
+            
+            <!-- Left Column: Visual Timeline & XAI Reasons -->
+            <div class="analysis-card timeline-card">
+              <div class="card-header-clean">
+                <span class="card-icon">⏳</span>
+                <h4>Document Integrity Timeline</h4>
+                <span class="sub-tag" id="timelineStatusTag">Valid Sequence</span>
+              </div>
+              <div class="timeline-stepper" id="visualTimeline">
+                <!-- Dynamically populated timeline nodes -->
+              </div>
+
+              <!-- Plain Language XAI Explanations -->
+              <div class="xai-reasons-container">
+                <div class="xai-header">
+                  <span class="xai-sparkle">✨</span>
+                  <h5>Plain-Language Explainable AI Breakdown</h5>
+                </div>
+                <div class="xai-items-list" id="xaiReasonsList">
+                  <!-- Dynamic XAI reason pills -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: "What Changed?" Tamper Diff & Practical Scenario Advice -->
+            <div class="analysis-card diff-scenario-card">
+              
+              <!-- Tamper Diff Section -->
+              <div class="card-header-clean">
+                <span class="card-icon">🔍</span>
+                <h4>Tamper Detection: What Changed?</h4>
+                <span class="sub-tag diff-tag" id="tamperDiffTag">Clean - 0 Modifications</span>
+              </div>
+              
+              <div class="tamper-diff-box" id="tamperDiffBox">
+                <div class="diff-columns">
+                  <div class="diff-col col-original">
+                    <div class="diff-col-head">Original Signed Content (Cryptographic Hash)</div>
+                    <div class="diff-content" id="diffOriginalContent">
+                      <!-- Populated dynamically -->
+                    </div>
+                  </div>
+                  <div class="diff-col col-modified">
+                    <div class="diff-col-head">Current Received File (Detected Content)</div>
+                    <div class="diff-content" id="diffModifiedContent">
+                      <!-- Populated dynamically -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- "Safe to Trust?" Practical Actionable Advice Matrix -->
+              <div class="scenario-advice-section">
+                <div class="scenario-head">
+                  <span class="scenario-icon">⚖️</span>
+                  <h5>Practical Advice: Is It Safe to Trust for Real-World Actions?</h5>
+                </div>
+                <div class="scenario-grid" id="scenarioGrid">
+                  <div class="scenario-card" id="scenBank">
+                    <div class="scen-top">
+                      <span class="scen-icon">🏦</span>
+                      <strong>Bank Loan / Disbursal</strong>
+                    </div>
+                    <p class="scen-text" id="scenBankText">Safe for disbursement. Digital signature legally binds signer under IT Act Section 10A.</p>
+                  </div>
+                  <div class="scenario-card" id="scenCourt">
+                    <div class="scen-top">
+                      <span class="scen-icon">⚖️</span>
+                      <strong>Court Legal Evidence</strong>
+                    </div>
+                    <p class="scen-text" id="scenCourtText">Admissible under Indian Evidence Act Section 65B without secondary notary certificate.</p>
+                  </div>
+                  <div class="scenario-card" id="scenGem">
+                    <div class="scen-top">
+                      <span class="scen-icon">🏛️</span>
+                      <strong>GeM / Tender Portal</strong>
+                    </div>
+                    <p class="scen-text" id="scenGemText">Valid for tender evaluation and technical committee bid opening.</p>
+                  </div>
+                  <div class="scenario-card" id="scenOffice">
+                    <div class="scen-top">
+                      <span class="scen-icon">🏢</span>
+                      <strong>Office / HR & Finance</strong>
+                    </div>
+                    <p class="scen-text" id="scenOfficeText">Acceptable for official record keeping, onboarding and invoice processing.</p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Bottom Row: Indian CA Trust Registry & Cryptographic Spec Details -->
+          <div class="citizen-cert-details-card">
+            <div class="card-header-clean">
+              <span class="card-icon">🏛️</span>
+              <h4>CCA India Certifying Authority & Post-Quantum Security Details</h4>
+              <span class="badge-cca">CCA India Root Validated</span>
+            </div>
+            <div class="cert-details-table-wrap">
+              <table class="cert-spec-table">
+                <thead>
+                  <tr>
+                    <th>Signer Identity</th>
+                    <th>Cert Authority (CA)</th>
+                    <th>Cryptographic Algorithm</th>
+                    <th>Validity Period</th>
+                    <th>Hardware TSA</th>
+                    <th>PQC Migration Status</th>
+                  </tr>
+                </thead>
+                <tbody id="certDetailsTbody">
+                  <!-- Dynamic row -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================== TAB 0B: BATCH VERIFICATION HUB ==================== -->
+        <div class="tab-panel" id="batch-verifier">
+          
+          <div class="batch-hero-card">
+            <div class="batch-hero-info">
+              <h3>Institutional High-Volume Document Screening</h3>
+              <p>Process enterprise batches of Aadhaar eSigned agreements, invoices, e-Tenders, and degrees in milliseconds.</p>
+            </div>
+            <div class="batch-hero-actions">
+              <button class="btn-cyber-primary" id="btnRunBatchScreening">
+                <span>⚡ Run Screening on 5 Enterprise Samples</span>
+              </button>
+              <button class="btn-cyber-secondary" id="btnExportBatchCsv">
+                <span>📥 Export CSV Report</span>
+              </button>
+              <button class="btn-cyber-secondary" id="btnPrintBatchAudit">
+                <span>🖨️ Print Audit Summary</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Batch KPI Cards -->
+          <div class="batch-kpis-grid">
+            <div class="kpi-card-b">
+              <span class="kpi-b-label">Total Documents Processed</span>
+              <span class="kpi-b-val" id="batchTotalCount">5</span>
+            </div>
+            <div class="kpi-card-b text-safe">
+              <span class="kpi-b-label">Verified Genuine (Safe)</span>
+              <span class="kpi-b-val text-success" id="batchSafeCount">2</span>
+            </div>
+            <div class="kpi-card-b text-tamper">
+              <span class="kpi-b-label">Tampered / Forged</span>
+              <span class="kpi-b-val text-alert" id="batchTamperedCount">2</span>
+            </div>
+            <div class="kpi-card-b text-warn">
+              <span class="kpi-b-label">Warning / Expired</span>
+              <span class="kpi-b-val text-warning" id="batchWarningCount">1</span>
+            </div>
+            <div class="kpi-card-b">
+              <span class="kpi-b-label">Avg Verification Latency</span>
+              <span class="kpi-b-val text-cyan" id="batchAvgLatency">1.18 ms/doc</span>
+            </div>
+          </div>
+
+          <!-- Batch Table Container -->
+          <div class="batch-table-container">
+            <table class="batch-table" id="batchResultsTable">
+              <thead>
+                <tr>
+                  <th>Doc ID & File Name</th>
+                  <th>Document Type</th>
+                  <th>Signer Name</th>
+                  <th>CA Issuer</th>
+                  <th>Quantum Safety Score</th>
+                  <th>Integrity Verdict</th>
+                  <th>Recommended Action</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="batchTableTbody">
+                <!-- Populated dynamically via JS -->
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+        <!-- ==================== TAB 0C: PLATFORM INTEGRATIONS & BOT SHOWCASE ==================== -->
+        <div class="tab-panel" id="integrations-view">
+          
+          <div class="integrations-header-card">
+            <h3>Everyday Citizen & Enterprise Integrations</h3>
+            <p>Bringing Quantum-Safe Document Verification directly where users live: WhatsApp, Telegram, Chrome Extension & Gmail.</p>
+          </div>
+
+          <div class="integrations-grid">
+            
+            <!-- WhatsApp Bot Smartphone Mockup -->
+            <div class="integration-card">
+              <div class="integ-card-head">
+                <span class="integ-icon" style="color:#25D366; font-size:24px;">📱</span>
+                <div>
+                  <h4>WhatsApp & Telegram Verifier Bot</h4>
+                  <span>Instant forward-and-verify chatbot for rural & non-tech citizens</span>
+                </div>
+              </div>
+
+              <!-- Realistic Smartphone Frame -->
+              <div class="smartphone-frame">
+                <div class="phone-screen">
+                  <div class="wa-header">
+                    <div class="wa-avatar">⚛️</div>
+                    <div class="wa-contact-info">
+                      <span class="wa-name">QI-CTD Verification Bot</span>
+                      <span class="wa-status">online • instant verify</span>
+                    </div>
+                  </div>
+
+                  <div class="wa-chat-body" id="waChatBody">
+                    <div class="wa-msg wa-msg-bot">
+                      Namaste! 🙏 Send me any PDF, Aadhaar eSign, GeM Tender, or Certificate to instantly verify if it's safe or tampered.
+                      <span class="wa-msg-time">10:14 AM</span>
+                    </div>
+                    <div class="wa-msg wa-msg-user">
+                      📄 GeM_Tender_Bid_4910.pdf (320 KB)
+                      <span class="wa-msg-time">10:15 AM</span>
+                    </div>
+                    <div class="wa-msg wa-msg-bot wa-bot-alert">
+                      <strong>🚨 QI-CTD VERDICT: TAMPERED DOCUMENT (UNSAFE) ❌</strong><br>
+                      • <strong>Document:</strong> GeM e-Tender Bid #4910<br>
+                      • <strong>Safety Score:</strong> 12/100 (Critical Risk)<br>
+                      • <strong>What Changed:</strong> Bid amount was modified from ₹50,000 to ₹5,00,000 after digital signing.<br>
+                      • <strong>Advice:</strong> ❌ Do NOT disburse funds or award contract.
+                      <span class="wa-msg-time">10:15 AM</span>
+                    </div>
+                  </div>
+
+                  <div class="wa-input-bar">
+                    <select id="waDocSelect" class="wa-select-input">
+                      <option value="sample_aadhaar">Test: Aadhaar eSign (Genuine)</option>
+                      <option value="sample_gem_tender" selected>Test: GeM e-Tender (Tampered ₹)</option>
+                      <option value="sample_degree">Test: DigiLocker Degree (Genuine)</option>
+                      <option value="sample_property">Test: Property Deed (Revoked CA)</option>
+                      <option value="sample_itrv">Test: ITR-V Ack (Expired Cert)</option>
+                    </select>
+                    <button class="btn-wa-send" id="btnSendWaDoc" title="Send Document to Bot">➤</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Browser Extension & Email Add-on Previews -->
+            <div class="integration-card">
+              <div class="integ-card-head">
+                <span class="integ-icon" style="color:#00f0ff; font-size:24px;">🌐</span>
+                <div>
+                  <h4>Browser Extension & Email Security Add-on</h4>
+                  <span>Passive background scanning for Chrome, Edge, Gmail & Outlook</span>
+                </div>
+              </div>
+
+              <!-- Mock Browser Extension Window -->
+              <div class="browser-addon-preview">
+                <div class="browser-bar">
+                  <span class="browser-dot red"></span>
+                  <span class="browser-dot yellow"></span>
+                  <span class="browser-dot green"></span>
+                  <span class="browser-url">chrome-extension://qi-ctd-guard/verify.html</span>
+                </div>
+                <div class="addon-popup-content">
+                  <div class="addon-header">
+                    <span class="addon-logo">⚛️ QI-CTD Shield</span>
+                    <span class="addon-badge-active">ACTIVE ON PAGE</span>
+                  </div>
+                  <div class="addon-body">
+                    <div class="addon-stat-row">
+                      <span>Detected Document:</span>
+                      <strong>DigiLocker_Degree_2026.pdf</strong>
+                    </div>
+                    <div class="addon-stat-row">
+                      <span>Signer Trust:</span>
+                      <strong class="text-success">eMudhra CCA Licensed CA ✓</strong>
+                    </div>
+                    <div class="addon-stat-row">
+                      <span>Integrity Status:</span>
+                      <strong class="text-success">100% Unaltered (Hash Matched)</strong>
+                    </div>
+                    <div class="addon-button-row">
+                      <button class="btn-addon-action" id="btnBrowseExtDemo">View Full Visual Audit</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3-Line API Integration Code Snippet -->
+              <div class="api-snippet-card" style="margin-top:20px;">
+                <div class="snippet-head">
+                  <span>💻 Embed in Any Web App (3-Line REST API)</span>
+                  <span class="code-lang">Python</span>
+                </div>
+                <pre class="snippet-code"><code>import requests
+res = requests.post("https://qi-ctd.onrender.com/api/v1/doc/verify",
+                    json={"preset_id": "sample_aadhaar", "lang": "hi"})
+verdict = res.json()["result"]["plain_verdict"]
+print(f"Verdict: {verdict['verdict_title']}") # ✅ सुरक्षित - डिजिटल हस्ताक्षर प्रामाणिक है</code></pre>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
         <!-- ==================== TAB 1: SOC VIEW ==================== -->
-        <div class="tab-panel active" id="soc-view">
+        <div class="tab-panel" id="soc-view">
           
           <!-- Quick Start & Live Pipeline Guide Banner -->
           <div class="quick-start-banner" id="quickStartBanner">

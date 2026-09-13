@@ -198,46 +198,52 @@ def create_code_pdf(output_pdf_path="QI_CTD_All_Source_Code.pdf"):
         ("core/ecdsa_recovery.py", "5. Mathematical ECDSA Nonce Collision & Private Key Recovery Engine",
          "Pure Python secp256k1 elliptic curve engine deriving ephemeral nonce k and private key dA with exact algebraic proof."),
 
-        ("core/pqc_mldsa.py", "6. NIST FIPS 204 (ML-DSA-65 / Dilithium) Lattice Cryptographic Engine",
+        ("core/doc_verifier.py", "6. Citizen Visual Document Verifier & CCA India Trust Registry",
+         "Digital document verification engine supporting Aadhaar eSign, GeM e-Tender, DigiLocker degrees, side-by-side tamper diffs, timeline, and 6 Indian languages."),
+
+        ("core/pqc_mldsa.py", "7. NIST FIPS 204 (ML-DSA-65 / Dilithium) Lattice Cryptographic Engine",
          "Post-quantum module-lattice cryptographic engine providing keypair generation, digital signing, and PEM seal verification."),
 
-        ("telemetry/sniffer.py", "7. Zero-Key Non-Invasive Network Packet Sniffer",
+        ("telemetry/sniffer.py", "8. Zero-Key Non-Invasive Network Packet Sniffer",
          "Zero-key packet capture engine analyzing packet headers, Shannon entropy, byte distributions, and timing without reading secret keys."),
         
-        ("telemetry/schema.py", "8. Telemetry & Schema Models", 
+        ("telemetry/schema.py", "9. Telemetry & Schema Models", 
          "Data structures for RFC-5280 metadata, normalized signature telemetry, quantum risk assets, and SOAR alerts."),
         
-        ("telemetry/normalizer.py", "9. Zero-Key Telemetry Normalizer", 
+        ("telemetry/normalizer.py", "10. Zero-Key Telemetry Normalizer", 
          "Extracts Shannon entropy, byte distributions, timing, and public metadata with zero plaintext / private key access."),
         
-        ("telemetry/public_apis_ingestor.py", "10. Real Public APIs Telemetry Ingestor", 
+        ("telemetry/public_apis_ingestor.py", "11. Real Public APIs Telemetry Ingestor", 
          "Connects live to open APIs (Blockchain.info, crt.sh, CISA KEV) indexed in public-apis/public-apis catalog."),
         
-        ("simulation/attack_generator.py", "11. Dynamic Cyber Attack Scenario Generator", 
+        ("simulation/attack_generator.py", "12. Dynamic Cyber Attack Scenario Generator", 
          "Simulates 4 dynamic cyber attack vectors: ECDSA Nonce Reuse, Signature Malleability, Rogue CI/CD Signing, and Quantum HNDL."),
         
-        ("database/db.py", "12. SQLite Audit Ledger & Database Layer", 
+        ("database/db.py", "13. SQLite Audit Ledger & Database Layer", 
          "Persistent SQLite storage for telemetry events, cryptographic SOAR audit trails, and key status records."),
         
-        ("engine.py", "13. Master QI-CTD Orchestration Engine", 
+        ("engine.py", "14. Master QI-CTD Orchestration Engine", 
          "End-to-end orchestration pipeline tying telemetry normalizer, quantum engines, QVS risk scorer, MLDSA65 PQC, and SOAR mitigation."),
         
-        ("api/server.py", "14. Multi-Threaded Public REST API Server", 
-         "HTTP server binding to 0.0.0.0:8000 handling REST endpoints (/alerts, /soar/execute, /benchmarks, /metrics/live, /pqc/sign, /public-apis)."),
+        ("api/server.py", "15. Multi-Threaded Public REST API Server", 
+         "HTTP server binding to 0.0.0.0:8000 handling REST endpoints (/alerts, /soar/execute, /benchmarks, /metrics/live, /pqc/sign, /public-apis, /doc/verify)."),
 
-        ("benchmarks/run_benchmarks.py", "15. Automated 1,000-Event Benchmark & Profiling Suite",
+        ("benchmarks/run_benchmarks.py", "16. Automated 1,000-Event Benchmark & Profiling Suite",
          "Evaluates detection recall, precision, latency percentiles (p50/p95/p99), and throughput across 1,000+ synthesized & real events."),
 
-        ("dashboard/app.js", "16. Frontend Dashboard State Machine & SOAR Controller", 
-         "Client-side JavaScript controller managing real-time canvas visualizers, live metric sync, and 1-Click Lockdown."),
+        ("dashboard/app.js", "17. Frontend Dashboard State Machine & SOAR Controller", 
+         "Client-side JavaScript controller managing real-time canvas visualizers, citizen document verification, batch hub, and 1-Click Lockdown."),
 
-        ("dashboard/index.html", "17. Frontend Dashboard UI Markup & Canvases", 
-         "HTML5 markup for SOC Triage, Quantum AI Core, Public APIs catalog, CISO Posture, Cert Inspector, and Live Benchmark Lab."),
+        ("dashboard/index.html", "18. Frontend Dashboard UI Markup & Canvases", 
+         "HTML5 markup for Citizen Verifier, Batch Hub, Integrations, SOC Triage, Quantum AI Core, Public APIs catalog, CISO Posture, and Benchmark Lab."),
 
-        ("launch_desktop_app.py", "18. Desktop GUI & Offline Application Launcher", 
+        ("dashboard/styles.css", "19. Responsive Cyberpunk & Citizen Styling Theme",
+         "Modern CSS stylesheet with dual-theme accents, glowing indicators, diff viewers, and smartphone WhatsApp simulator."),
+
+        ("launch_desktop_app.py", "20. Desktop GUI & Offline Application Launcher", 
          "Tkinter-based desktop GUI launcher providing 1-click startup, cloud link, and local server process management."),
 
-        ("run_demo.py", "19. Terminal Interactive Demo & Benchmark Script", 
+        ("run_demo.py", "21. Terminal Interactive Demo & Benchmark Script", 
          "Standalone terminal script demonstrating 3.8ms anomaly detection, ECDSA key recovery, and quantum vulnerability scoring.")
     ]
 
